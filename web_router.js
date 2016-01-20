@@ -36,10 +36,10 @@ router.get('/app/download', site.appDownload);
 
 // sign controller
 if (config.allow_sign_up) {
-  router.get('/signup', sign.showSignup);  // 跳转到注册页面
-  router.post('/signup', sign.signup);  // 提交注册信息
+    router.get('/signup', sign.showSignup);  // 跳转到注册页面
+    router.post('/signup', sign.signup);  // 提交注册信息
 } else {
-  router.get('/signup', configMiddleware.github, passport.authenticate('github'));  // 进行github验证
+    router.get('/signup', configMiddleware.github, passport.authenticate('github'));  // 进行github验证
 }
 router.post('/signout', sign.signout);  // 登出
 router.get('/signin', sign.showLogin);  // 进入登录页面
@@ -109,8 +109,8 @@ router.get('/rss', rss.index);
 // github oauth
 router.get('/auth/github', configMiddleware.github, passport.authenticate('github'));
 router.get('/auth/github/callback',
-  passport.authenticate('github', { failureRedirect: '/signin' }),
-  github.callback);
+    passport.authenticate('github', {failureRedirect: '/signin'}),
+    github.callback);
 router.get('/auth/github/new', github.new);
 router.post('/auth/github/create', github.create);
 

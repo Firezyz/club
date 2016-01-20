@@ -1,13 +1,13 @@
-var User       = require('../proxy/user');
-var Message    = require('../proxy/message');
-var JPush      = require("jpush-sdk");
+var User = require('../proxy/user');
+var Message = require('../proxy/message');
+var JPush = require("jpush-sdk");
 var eventproxy = require('eventproxy');
-var config     = require('../config');
-var client     = null;
-var logger = require('./logger')
+var config = require('../config');
+var client = null;
+var logger = require('./logger');
 
 if (config.jpush && config.jpush.masterSecret !== 'YourSecretKeyyyyyyyyyyyyy') {
-  client = JPush.buildClient(config.jpush);
+    client = JPush.buildClient(config.jpush);
 }
 
 /**
@@ -18,42 +18,42 @@ if (config.jpush && config.jpush.masterSecret !== 'YourSecretKeyyyyyyyyyyyyy') {
  * @param {String} topic_id 相关主题ID
  */
 exports.send = function (type, author_id, master_id, topic_id) {
-  if (client !== null) {
-    var ep = new eventproxy();
-    User.getUserById(author_id, ep.done('author'));
-    Message.getMessagesCount(master_id, ep.done('count'));
-    ep.all('author', 'count', function (author, count) {
-      var msg = author.loginname + ' ';
-      var extras = {
-        topicId: topic_id
-      };
-      switch (type) {
-      case 'at':
-        msg += '@了你';
-        break;
-      case 'reply':
-        msg += '回复了你的主题';
-        break;
-      default:
-        break;
-      }
-      client.push()
-        .setPlatform(JPush.ALL)
-        .setAudience(JPush.alias(master_id.toString()))
-        .setNotification(msg,
-          JPush.ios(msg, null, count, null, extras),
-          JPush.android(msg, null, null, extras)
-        )
-        .setOptions(null, null, null, !config.debug)
-        .send(function (err, res) {
-          if (err) {
-            return logger.error(err);
-          }
-          if (config.debug) {
-            logger.info('Sendno: ' + res.sendno);
-            logger.info('Msg_id: ' + res.msg_id);
-          }
-        });
-    })
-  }
+    if (client !== null) {
+        var ep = new eventproxy();
+        User.getUserById(author_id, ep.done('author'));
+        Message.getMessagesCount(master_id, ep.done('count'));
+        ep.all('author', 'count', function (author, count) {
+            var msg = author.loginname + ' ';
+            var extras = {
+                topicId: topic_id
+            };
+            switch (type) {
+                case 'at':
+                    msg += '@了你';
+                    break;
+                case 'reply':
+                    msg += '回复了你的主题';
+                    break;
+                default:
+                    break;
+            }
+            client.push()
+                .setPlatform(JPush.ALL)
+                .setAudience(JPush.alias(master_id.toString()))
+                .setNotification(msg,
+                JPush.ios(msg, null, count, null, extras),
+                JPush.android(msg, null, null, extras)
+            )
+                .setOptions(null, null, null, !config.debug)
+                .send(function (err, res) {
+                    if (err) {
+                        return logger.error(err);
+                    }
+                    if (config.debug) {
+                        logger.info('Sendno: ' + res.sendno);
+                        logger.info('Msg_id: ' + res.msg_id);
+                    }
+                });
+        })
+    }
 };
