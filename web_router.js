@@ -21,6 +21,7 @@ var auth = require('./middlewares/auth');
 var limit = require('./middlewares/limit');
 var github = require('./controllers/github');
 var search = require('./controllers/search');
+var manage = require('./controllers/manage');
 var passport = require('passport');
 var configMiddleware = require('./middlewares/conf');
 var config = require('./config');
@@ -115,5 +116,14 @@ router.get('/auth/github/new', github.new);
 router.post('/auth/github/create', github.create);
 
 router.get('/search', search.index);
+
+router.get('/manage', manage.index);
+router.post('/manage/user/:user_ids/delete', auth.userRequired, manage.index);
+router.post('/manage/user/:user_ids/block', auth.userRequired, manage.index);
+router.post('/manage/topic/:topic_ids/delete', auth.userRequired, manage.index);
+router.post('/manage/topic/:topic_ids/top', auth.userRequired, manage.index);
+router.post('/manage/topic/:topic_ids/good', auth.userRequired, manage.index);
+router.post('/manage/topic/:topic_ids/lock', auth.userRequired, manage.index);
+router.post('/manage/topic/:topic_ids/block', auth.userRequired, manage.index);
 
 module.exports = router;

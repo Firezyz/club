@@ -41,9 +41,13 @@ exports.webmasterRequired = function (req, res, next) {
     if (!req.session.user) {
         return res.render('notify/notify', {error: '请先登录'})
     }
+    if (req.session.user.is_admin) {
+        next();
+    }
     if (!req.session.user.is_webmaster) {
         return res.render('notify/notify', {error: '需要版主权限。'})
     }
+    next();
 };
 
 exports.blockUser = function () {
@@ -60,6 +64,18 @@ exports.blockUser = function () {
         next();
     };
 };
+
+//exports.blockTopic= function (req, res, next) {
+//        // 可以登出用户
+//        if (req.path === '/signout') {
+//            return next();
+//        }
+//
+//        if (req.session.user && req.session.user.is_block && req.method !== 'GET') {
+//            return res.status(403).send('该主题已经被管理员屏蔽！请联系管理员解开屏蔽');
+//        }
+//        next();
+//};
 
 exports.gen_session = function (user, res) {
     var auth_token = user._id + 'O(∩_∩)O'; // 以后可能会存储更多信息，用 O(∩_∩)O 来分隔
