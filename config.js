@@ -12,13 +12,13 @@ var config = {
         return !this.debug;
     }, // 是否启用静态文件的合并压缩，详见视图中的Loader
 
-    name: 'Nodeclub', // 社区名字
-    description: 'CNode：Node.js专业中文社区', // 社区的描述
-    keywords: 'nodejs, node, express, connect, socket.io',
+    name: 'JLUclub', // 社区名字
+    description: 'JLU技术交流社区', // 社区的描述
+    keywords: '技术,JLU,吉大',
 
     // 添加到 html head 中的信息
     site_headers: [
-        '<meta name="author" content="EDP@TAOBAO" />'
+        '<meta name="author" content="Firezyz@JLU" />'
     ],
     site_logo: '/public/images/cnodejs_light.svg', // default is `name`
     site_icon: '/public/images/cnode_icon_32.png', // 默认没有 favicon, 这里填写网址
@@ -37,7 +37,7 @@ var config = {
     cnzz_tracker_id: '',
 
     // mongodb 配置
-    db: 'mongodb://127.0.0.1/node_club_dev',
+    db: 'mongodb://127.0.0.1/jlu_club_dev',
 
     // redis 配置，默认是本地
     redis_host: '127.0.0.1',
@@ -45,7 +45,7 @@ var config = {
     redis_db: 0,
 
     session_secret: 'firezyz', // 务必修改
-    auth_cookie_name: 'node_club',
+    auth_cookie_name: 'jlu_club',
 
     // 程序运行的端口
     port: 3000,
@@ -55,10 +55,10 @@ var config = {
 
     // RSS配置
     rss: {
-        title: 'CNode：Node.js专业中文社区',
-        link: 'http://cnodejs.org',
+        title: 'JLU技术交流社区',
+        link: 'club.jlu.edu.cn',
         language: 'zh-cn',
-        description: 'CNode：Node.js专业中文社区',
+        description: 'JLU技术交流社区',
         //最多获取的RSS Item数量
         max_rss_items: 50
     },
@@ -136,7 +136,7 @@ var config = {
 };
 
 if (process.env.NODE_ENV === 'test') {
-    config.db = 'mongodb://127.0.0.1/node_club_test';
+    config.db = 'mongodb://127.0.0.1/jlu_club_test';
 }
 
 module.exports = config;
