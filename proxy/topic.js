@@ -146,7 +146,7 @@ exports.getFullTopic = function (id, callback) {
         User.getUserById(topic.author_id, proxy.done(function (author) {
             if (!author) {
                 proxy.unbind();
-                return callback(null, '话题的作者丢了。');
+                return callback(null, '话题的作者被外星人抓走啦。');
             }
             proxy.emit('author', author);
         }));

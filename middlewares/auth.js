@@ -31,6 +31,7 @@ exports.userRequired = function (req, res, next) {
     next();
 };
 
+
 /**
  * 需要版主权限
  * @param req
