@@ -5,7 +5,7 @@ var logger = require('./logger');
 var client = new Redis({
     port: config.redis_port,
     host: config.redis_host,
-    db: config.redis_db,
+    db: config.redis_db
 });
 
 client.on('error', function (err) {

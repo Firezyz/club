@@ -1,0 +1,13 @@
+<div class='cell'>
+
+  <a class="user_avatar pull-left" href="/user/<%= user.name %>">
+    <img src="<%= proxy(user.avatar) %>"
+         title="<%= user.name %>"
+            />
+  </a>
+  <div class="topic_title_wrapper">
+    <a class='topic_title' href='/user/<%= user._id %>' title='<%= user.name %>'>
+      <%= user.name %>
+    </a>
+  </div>
+</div>

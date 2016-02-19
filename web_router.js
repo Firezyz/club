@@ -19,6 +19,7 @@ var manage = require('./controllers/manage');
 var passport = require('passport');
 var configMiddleware = require('./middlewares/conf');
 var config = require('./config');
+var admin = require('./controllers/admin')
 
 var router = express.Router();
 
@@ -36,6 +37,8 @@ router.get('/', site.index);
 } else {
     router.get('/signup', configMiddleware.github, passport.authenticate('github'));  // 进行github验证
 }*/
+
+router.get('/admin', auth.adminRequired, admin.showAdmin); // 跳转到管理员页面
 
 router.get('/signup', sign.showSignup);  // 跳转到注册页面
 router.post('/signup', sign.signup);  // 提交注册信息
