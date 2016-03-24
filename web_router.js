@@ -9,11 +9,11 @@ var user = require('./controllers/user');
 var message = require('./controllers/message');
 var topic = require('./controllers/topic');
 var reply = require('./controllers/reply');
-var rss = require('./controllers/rss');
+//var rss = require('./controllers/rss');
 var staticController = require('./controllers/static');
 var auth = require('./middlewares/auth');
 var limit = require('./middlewares/limit');
-var github = require('./controllers/github');
+//var github = require('./controllers/github');
 var search = require('./controllers/search');
 var manage = require('./controllers/manage');
 var passport = require('passport');
@@ -105,15 +105,15 @@ router.get('/robots.txt', staticController.robots);
 router.get('/api', staticController.api);
 
 //rss
-router.get('/rss', rss.index);
+//router.get('/rss', rss.index);
 
 // github oauth
-router.get('/auth/github', configMiddleware.github, passport.authenticate('github'));
-router.get('/auth/github/callback',
-    passport.authenticate('github', {failureRedirect: '/signin'}),
-    github.callback);
-router.get('/auth/github/new', github.new);
-router.post('/auth/github/create', github.create);
+//router.get('/auth/github', configMiddleware.github, passport.authenticate('github'));
+//router.get('/auth/github/callback',
+//    passport.authenticate('github', {failureRedirect: '/signin'}),
+//    github.callback);
+//router.get('/auth/github/new', github.new);
+//router.post('/auth/github/create', github.create);
 
 router.get('/search', search.index);
 

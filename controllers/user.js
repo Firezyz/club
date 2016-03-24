@@ -144,12 +144,12 @@ exports.setting = function (req, res, next) {
         }
 
         User.getUserById(req.session.user._id, ep.done(function (user) {
-            tools.bcompare(old_pass, user.pass, ep.done(function (bool) {
+            tools.bcrypt_compare(old_pass, user.pass, ep.done(function (bool) {
                 if (!bool) {
                     return showMessage('当前密码不正确。', user);
                 }
 
-                tools.bhash(new_pass, ep.done(function (passhash) {
+                tools.bcrypt_hash(new_pass, ep.done(function (passhash) {
                     user.pass = passhash;
                     user.save(function (err) {
                         if (err) {

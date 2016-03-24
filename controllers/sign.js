@@ -63,7 +63,7 @@ exports.signup = function (req, res, next) {
             return;
         }
 
-        tools.bhash(pass, ep.done(function (passhash) {
+        tools.bcrypt_hash(pass, ep.done(function (passhash) {
             // create gravatar
             var avatarUrl = User.makeGravatar(email);
             User.newAndSave(loginname, loginname, passhash, email, avatarUrl, false, function (err) {
@@ -117,7 +117,9 @@ exports.login = function (req, res, next) {
 
     ep.fail(next);
 
-    if (!loginname || !pass) {
+    if ([loginname, pass].some(function (item) {
+            return item === '';
+        })) {
         res.status(422);
         return res.render('sign/signin', {error: '信息不完整。'});
     }
@@ -129,7 +131,7 @@ exports.login = function (req, res, next) {
         getUser = User.getUserByLoginName;
     }
 
-    ep.on('login_error', function (login_error) {
+    ep.on('login_failed', function (login_failed) {
         res.status(403);
         res.render('sign/signin', {error: '用户名或密码错误'});
     });
@@ -139,12 +141,12 @@ exports.login = function (req, res, next) {
             return next(err);
         }
         if (!user) {
-            return ep.emit('login_error');
+            return ep.emit('login_failed');
         }
         var passhash = user.pass;
-        tools.bcompare(pass, passhash, ep.done(function (bool) {
-            if (!bool) {
-                return ep.emit('login_error');
+        tools.bcrypt_compare(pass, passhash, ep.done(function (flag) {
+            if (!flag) {
+                return ep.emit('login_failed');
             }
             if (!user.active) {
                 // 重新发送激活邮件
@@ -154,8 +156,11 @@ exports.login = function (req, res, next) {
             }
             // store session cookie
             authMiddleWare.gen_session(user, res);
+
             //check at some page just jump to home page
             var refer = req.session._loginReferer || '/';
+
+            //过滤调回的页面
             for (var i = 0, len = notJump.length; i !== len; ++i) {
                 if (refer.indexOf(notJump[i]) >= 0) {
                     refer = '/';
@@ -277,7 +282,7 @@ exports.updatePass = function (req, res, next) {
         if (!user) {
             return res.render('notify/notify', {error: '错误的激活链接'});
         }
-        tools.bhash(psw, ep.done(function (passhash) {
+        tools.bcrypt_hash(psw, ep.done(function (passhash) {
             user.pass = passhash;
             user.retrieve_key = null;
             user.retrieve_time = null;

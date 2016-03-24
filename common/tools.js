@@ -19,10 +19,10 @@ exports.validateId = function (str) {
     return (/^[a-zA-Z0-9\-_]+$/i).test(str);
 };
 
-exports.bhash = function (str, callback) {
+exports.bcrypt_hash = function (str, callback) {
     bcrypt.hash(str, 10, callback);
 };
 
-exports.bcompare = function (str, hash, callback) {
+exports.bcrypt_compare = function (str, hash, callback) {
     bcrypt.compare(str, hash, callback);
 };

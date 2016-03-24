@@ -100,18 +100,18 @@ exports.create = function (req, res, next) {
             res.redirect('/');
         });
     } else { // 关联老账号
-        ep.on('login_error', function (login_error) {
+        ep.on('login_failed', function (login_failed) {
             res.status(403);
             res.render('sign/signin', {error: '账号名或密码错误。'});
         });
         User.findOne({loginname: loginname},
             ep.done(function (user) {
                 if (!user) {
-                    return ep.emit('login_error');
+                    return ep.emit('login_failed');
                 }
-                tools.bcompare(password, user.pass, ep.done(function (bool) {
+                tools.bcrypt_compare(password, user.pass, ep.done(function (bool) {
                     if (!bool) {
-                        return ep.emit('login_error');
+                        return ep.emit('login_failed');
                     }
                     user.githubUsername = profile.username;
                     user.githubId = profile.id;
