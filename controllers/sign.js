@@ -49,24 +49,31 @@ exports.signup = function (req, res, next) {
     // END 验证信息的正确性
 
 
-    User.getUsersByQuery({
-        '$or': [
-            {'loginname': loginname},
-            {'email': email}
-        ]
-    }, {}, function (err, users) {
-        if (err) {
-            return next(err);
+    User.getUsersMutiQuery({
+        "query": {
+            "bool": {"should": [{"term": {"loginname": loginname}}, {"term": {"email": email}}]}
         }
-        if (users.length > 0) {
+    }, function (err, result) {
+        console.error("++++++++++++++++++++++");
+        console.log(result);
+        console.error("++++++++++++++++++++++");
+        if (result['hits']['hits'].length > 0) {
             ep.emit('prop_err', '用户名或邮箱已被使用。');
             return;
         }
+        //if (err) {
+        //    return next(err);
+        //}
 
         tools.bcrypt_hash(pass, ep.done(function (passhash) {
             // create gravatar
             var avatarUrl = User.makeGravatar(email);
-            User.newAndSave(loginname, loginname, passhash, email, avatarUrl, false, function (err) {
+            User.newAndSave(loginname, loginname, passhash, email, avatarUrl, false, function (err, result) {
+                console.error("++++++++++++++++++++++");
+                console.log(result);
+                console.log(err)
+                console.error("++++++++++++++++++++++");
+
                 if (err) {
                     return next(err);
                 }
@@ -136,13 +143,18 @@ exports.login = function (req, res, next) {
         res.render('sign/signin', {error: '用户名或密码错误'});
     });
 
-    getUser(loginname, function (err, user) {
+    getUser(loginname, function (err, result) {
         if (err) {
             return next(err);
         }
-        if (!user) {
+        users = result['hits']['hits']
+        if (users.length !== 1) {
             return ep.emit('login_failed');
         }
+        user = users[0]['_source'];
+        console.error("==================");
+        console.info(user);
+        console.error("==================");
         var passhash = user.pass;
         tools.bcrypt_compare(pass, passhash, ep.done(function (flag) {
             if (!flag) {

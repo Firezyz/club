@@ -3,16 +3,6 @@ var User = models.User;
 var utility = require('utility');
 var uuid = require('node-uuid');
 
-var elasticsearch = require('elasticsearch');
-var config = require('../config');
-
-var client = new elasticsearch.Client({
-    host: config.es_host + ':' + config.es_port,
-    log: config.es_log
-});
-client.indices.create({index: config.es_index});
-
-
 /**
  * 根据用户名列表查找用户列表
  * Callback:
@@ -25,14 +15,7 @@ exports.getUsersByNames = function (names, callback) {
     if (names.length === 0) {
         return callback(null, []);
     }
-    client.mget({
-        index: config.es_index,
-        type: 'user',
-        body: {
-            loginname: names
-        }
-    }, callback);
-    //User.find({loginname: {$in: names}}, callback);
+    User.find({loginname: {$in: names}}, callback);
 };
 
 /**
@@ -44,11 +27,7 @@ exports.getUsersByNames = function (names, callback) {
  * @param {Function} callback 回调函数
  */
 exports.getUserByLoginName = function (loginName, callback) {
-    client.search({
-        index: config.es_index,
-        q: 'loginname:' + loginName
-    }, callback);
-    //User.findOne({'loginname': loginName}, callback);
+    User.findOne({'loginname': loginName}, callback);
 };
 
 /**
@@ -63,11 +42,7 @@ exports.getUserById = function (id, callback) {
     if (!id) {
         return callback();
     }
-    client.search({
-        index: config.es_index,
-        q: 'id:' + id
-    }, callback);
-    //User.findOne({_id: id}, callback);
+    User.findOne({_id: id}, callback);
 };
 
 /**
@@ -79,11 +54,7 @@ exports.getUserById = function (id, callback) {
  * @param {Function} callback 回调函数
  */
 exports.getUserByMail = function (email, callback) {
-    client.search({
-        index: config.es_index,
-        q: 'email:' + email
-    }, callback);
-    //User.findOne({email: email}, callback);
+    User.findOne({email: email}, callback);
 };
 
 /**
@@ -95,14 +66,7 @@ exports.getUserByMail = function (email, callback) {
  * @param {Function} callback 回调函数
  */
 exports.getUsersByIds = function (ids, callback) {
-    client.mget({
-        index: config.es_index,
-        type: 'user',
-        body: {
-            id: ids
-        }
-    }, callback);
-    //User.find({'_id': {'$in': ids}}, callback);
+    User.find({'_id': {'$in': ids}}, callback);
 };
 
 /**
@@ -115,31 +79,8 @@ exports.getUsersByIds = function (ids, callback) {
  * @param {Function} callback 回调函数
  */
 exports.getUsersByQuery = function (query, opt, callback) {
-    client.mget({
-        index: config.es_index,
-        type: 'user',
-        body: query
-    }, callback);
-    //query_opt = {
-    //    index: config.es_indexs,
-    //    body: {
-    //        query: {}
-    //    }
-    //}
-    //for (var key in opt) {
-    //    query_opt[key] = opt[key];
-    //}
-    //query_opt['body']['query'] = query;
-    //client.search(query_opt, callback);
-}
-;
-
-exports.getUsersMutiQuery = function (query, callback) {
-    client.search({
-        index: config.es_index,
-        body: query
-    },callback);
-}
+    User.find(query, '', opt, callback);
+};
 
 /**
  * 根据查询条件，获取一个用户
@@ -151,34 +92,20 @@ exports.getUsersMutiQuery = function (query, callback) {
  * @param {Function} callback 回调函数
  */
 exports.getUserByNameAndKey = function (loginname, key, callback) {
-    client.search({
-        index: config.es_indexs,
-        body: {
-            query: {
-                match: {
-                    loginname: loginname,
-                    retrieve_key: key
-                }
-            }
-        }
-    }, callback);
+    User.findOne({loginname: loginname, retrieve_key: key}, callback);
 };
 
 exports.newAndSave = function (name, loginname, pass, email, avatar_url, active, callback) {
-    client.index({
-        index: config.es_index,
-        type: 'user',
-        //id: '1',
-        body: {
-            name: loginname,
-            loginname: loginname,
-            pass: pass,
-            email: email,
-            avatar: avatar_url,
-            active: active || false,
-            accessToken: uuid.v4()
-        }
-    }, callback);
+    var user = new User();
+    user.name = loginname;
+    user.loginname = loginname;
+    user.pass = pass;
+    user.email = email;
+    user.avatar = avatar_url;
+    user.active = active || false;
+    user.accessToken = uuid.v4();
+
+    user.save(callback);
 };
 
 var makeGravatar = function (email) {
