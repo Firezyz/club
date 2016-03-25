@@ -7,34 +7,74 @@ var client = new elasticsearch.Client({
 });
 
 
+//client.search({
+//    index: config.es_index,
+//    q: 'email:zhangsan@qq.com'
+//}, function (error, response) {
+//    console.log("==================");
+//    console.error(response);
+//    console.log("==================");
+//});
+
+email = 'zhangsan@qq.com';
+emails = email.split('@');
+
 client.search({
-        index: config.es_index,
-        body: {
-            "query": {
-                "bool": {
-                    "should": [
-                        {
-                            "match": {
-                                "loginname": "zhangyuzhu"
-                            }
-                        },
-                        {
-                            "match": {
-                                "email": "zhangyuzhu@qq.com"
-                            }
+    index: config.es_index,
+    body: {
+        query: {
+            bool: {
+                must: [
+                    {
+                        term: {
+                            email: emails[emails.length - 1]
                         }
-                    ]
-                }
+                    },
+                    {
+                        term: {
+                            email: emails[0]
+                        }
+                    }
+                ]
+
             }
         }
-    },
-    function (error, response) {
-        console.log("==================");
-        console.error(response);
-        console.log("==================");
     }
-)
-;
+}, function (error, response) {
+    console.log("==================");
+    console.error(response);
+    console.log("==================");
+});
+
+
+//client.search({
+//        index: config.es_index,
+//        body: {
+//            "query": {
+//                "bool": {
+//                    "should": [
+//                        {
+//                            "match": {
+//                                "loginname": "zhangyuzhu"
+//                            }
+//                        },
+//                        {
+//                            "match": {
+//                                "email": "zhangyuzhu@qq.com"
+//                            }
+//                        }
+//                    ]
+//                }
+//            }
+//        }
+//    },
+//    function (error, response) {
+//        console.log("==================");
+//        console.error(response);
+//        console.log("==================");
+//    }
+//)
+//;
 
 
 //client.indices.create({index: config.es_index});

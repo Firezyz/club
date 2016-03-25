@@ -12,6 +12,63 @@ var client = new elasticsearch.Client({
 });
 client.indices.create({index: config.es_index});
 
+//client.indices.putMapping({
+//    index: config.es_index,
+//    type: 'user',
+//    body: {
+//        user: {
+//            properties: {
+//                name: {
+//                    type: 'string',
+//                    term_vector: 'with_positions_offsets',
+//                    analyzer: 'ik_syno',
+//                    search_analyzer: 'ik_syno'
+//                },
+//                loginname: {
+//                    type: 'string',
+//                    term_vector: 'with_positions_offsets',
+//                    analyzer: 'ik_syno',
+//                    search_analyzer: 'ik_syno'
+//                },
+//                pass: {type: 'string'},
+//                email: {type: 'string'},
+//                url: {type: 'string'},
+//                profile_image_url: {type: 'string'},
+//                location: {type: 'string'},
+//                signature: {type: 'string'},
+//                profile: {type: 'string'},
+//                weibo: {type: 'string'},
+//                avatar: {type: 'string'},
+//                githubId: {type: 'string'},
+//                githubUsername: {type: 'string'},
+//                githubAccessToken: {type: 'string'},
+//                is_block: {type: 'boolean'},
+//                score: {type: 'integer'},
+//                topic_count: {type: 'integer'},
+//                reply_count: {type: 'integer'},
+//                follower_count: {type: 'integer'},
+//                following_count: {type: 'integer'},
+//                collect_tag_count: {type: 'integer'},
+//                collect_topic_count: {type: 'integer'},
+//                create_at: {type: 'date'},
+//                update_at: {type: 'date'},
+//                is_star: {type: 'boolean'},
+//                level: {type: 'string'},
+//                active: {type: 'boolean'},
+//                is_admin: {type: 'boolean'},
+//                receive_reply_mail: {type: 'boolean'},
+//                receive_at_mail: {type: 'boolean'},
+//                from_wp: {type: 'boolean'},
+//
+//                retrieve_time: {type: 'long'},
+//                retrieve_key: {type: 'string'},
+//
+//                accessToken: {type: 'string'}
+//            }
+//        }
+//    }
+//});
+
 
 /**
  * 根据用户名列表查找用户列表
@@ -51,6 +108,16 @@ exports.getUserByLoginName = function (loginName, callback) {
     //User.findOne({'loginname': loginName}, callback);
 };
 
+
+exports.updateUserById = function (id, update, callback) {
+    client.update({
+        index: config.es_index,
+        type: 'user',
+        id: id,
+        body: update
+    }, callback)
+}
+
 /**
  * 根据用户ID，查找用户
  * Callback:
@@ -79,10 +146,13 @@ exports.getUserById = function (id, callback) {
  * @param {Function} callback 回调函数
  */
 exports.getUserByMail = function (email, callback) {
-    client.search({
-        index: config.es_index,
-        q: 'email:' + email
-    }, callback);
+    emails = email.split('@');
+    query = {
+        "query": {
+            bool: {must: [{term: {email: emails[0]}}, {term: {email: emails[emails.length - 1]}}]}
+        }
+    }
+    getUsersMutiQuery(query, callback);
     //User.findOne({email: email}, callback);
 };
 
@@ -134,11 +204,21 @@ exports.getUsersByQuery = function (query, opt, callback) {
 }
 ;
 
-exports.getUsersMutiQuery = function (query, callback) {
+exports.getUsersByNameOrEmail = function (loginname, email, callback) {
+    query = {
+        "query": {
+            "bool": {"should": [{"term": {"loginname": loginname}}, {"term": {"email": email}}]}
+        }
+    }
+    getUsersMutiQuery(query, callback);
+}
+
+
+getUsersMutiQuery = function (query, callback) {
     client.search({
         index: config.es_index,
         body: query
-    },callback);
+    }, callback);
 }
 
 /**
@@ -151,17 +231,20 @@ exports.getUsersMutiQuery = function (query, callback) {
  * @param {Function} callback 回调函数
  */
 exports.getUserByNameAndKey = function (loginname, key, callback) {
-    client.search({
-        index: config.es_indexs,
-        body: {
-            query: {
-                match: {
-                    loginname: loginname,
-                    retrieve_key: key
-                }
-            }
+    console.error("是是是" + key);
+    tocken_keys = key.split('-');
+    console.error("切割之后" + tocken_keys)
+    must_list = []
+    must_list.push({"term": {loginname: loginname}});
+    for (var i = 0; i < tocken_keys.length; i++) {
+        must_list.push({"term": {retrieve_key: tocken_keys[i]}});
+    }
+    query = {
+        "query": {
+            "bool": {"must": must_list}
         }
-    }, callback);
+    }
+    getUsersMutiQuery(query, callback)
 };
 
 exports.newAndSave = function (name, loginname, pass, email, avatar_url, active, callback) {

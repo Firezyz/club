@@ -49,11 +49,7 @@ exports.signup = function (req, res, next) {
     // END 验证信息的正确性
 
 
-    User.getUsersMutiQuery({
-        "query": {
-            "bool": {"should": [{"term": {"loginname": loginname}}, {"term": {"email": email}}]}
-        }
-    }, function (err, result) {
+    User.getUsersByNameOrEmail(loginname, email, function (err, result) {
         console.error("++++++++++++++++++++++");
         console.log(result);
         console.error("++++++++++++++++++++++");
@@ -195,13 +191,19 @@ exports.activeAccount = function (req, res, next) {
     var key = validator.trim(req.query.key);
     var name = validator.trim(req.query.name);
 
-    User.getUserByLoginName(name, function (err, user) {
+    User.getUserByLoginName(name, function (err, result) {
+        users = result['hits']['hits'];
+        if (users.length > 1) {
+            return next(new Error('[ACTIVE_ACCOUNT] multi users'));
+        }
         if (err) {
             return next(err);
         }
-        if (!user) {
+        if (users.length == 0) {
             return next(new Error('[ACTIVE_ACCOUNT] no such user: ' + name));
         }
+        user = users[0]['_source'];
+        document_id = users[0]['_id'];
         var passhash = user.pass;
         if (!user || utility.md5(user.email + passhash + config.session_secret) !== key) {
             return res.render('notify/notify', {error: '信息有误，帐号无法被激活。'});
@@ -209,8 +211,8 @@ exports.activeAccount = function (req, res, next) {
         if (user.active) {
             return res.render('notify/notify', {error: '帐号已经是激活状态。'});
         }
-        user.active = true;
-        user.save(function (err) {
+
+        User.updateUserById(document_id, {doc: {active: true}}, function (err) {
             if (err) {
                 return next(err);
             }
@@ -233,18 +235,24 @@ exports.updateSearchPass = function (req, res, next) {
     var retrieveKey = uuid.v4();
     var retrieveTime = new Date().getTime();
 
-    User.getUserByMail(email, function (err, user) {
-        if (!user) {
+    User.getUserByMail(email, function (err, result) {
+        users = result['hits']['hits'];
+        if (users.length == 0) {
             res.render('sign/search_pass', {error: '没有这个电子邮箱。', email: email});
             return;
         }
-        user.retrieve_key = retrieveKey;
-        user.retrieve_time = retrieveTime;
-        user.save(function (err) {
+        user = users[0]['_source'];
+        document_id = users[0]['_id'];
+
+        User.updateUserById(document_id, {
+            doc: {
+                retrieve_key: retrieveKey,
+                retrieve_time: retrieveTime
+            }
+        }, function (err) {
             if (err) {
                 return next(err);
             }
-            // 发送重置密码邮件
             mail.sendResetPassMail(email, retrieveKey, user.loginname);
             res.render('notify/notify', {success: '我们已给您填写的电子邮箱发送了一封邮件，请在24小时内点击里面的链接来重置密码。'});
         });
@@ -263,11 +271,13 @@ exports.resetPass = function (req, res, next) {
     var key = validator.trim(req.query.key);
     var name = validator.trim(req.query.name);
 
-    User.getUserByNameAndKey(name, key, function (err, user) {
-        if (!user) {
+    User.getUserByNameAndKey(name, key, function (err, result) {
+        users = result['hits']['hits'];
+        if (users.length == 0) {
             res.status(403);
             return res.render('notify/notify', {error: '信息有误，密码无法重置。'});
         }
+        user = users[0]['_source'];
         var now = new Date().getTime();
         var oneDay = 1000 * 60 * 60 * 24;
         if (!user.retrieve_time || now - user.retrieve_time > oneDay) {
@@ -290,22 +300,36 @@ exports.updatePass = function (req, res, next) {
     if (psw !== repsw) {
         return res.render('sign/reset', {name: name, key: key, error: '两次密码输入不一致。'});
     }
-    User.getUserByNameAndKey(name, key, ep.done(function (user) {
-        if (!user) {
+    User.getUserByNameAndKey(name, key, ep.done(function (result) {
+        users = result['hits']['hits'];
+        if (users.length == 0) {
             return res.render('notify/notify', {error: '错误的激活链接'});
         }
+        document_id = users[0]['_id'];
+        user = users[0]['_source'];
+
         tools.bcrypt_hash(psw, ep.done(function (passhash) {
             user.pass = passhash;
             user.retrieve_key = null;
             user.retrieve_time = null;
             user.active = true; // 用户激活
 
-            user.save(function (err) {
-                if (err) {
-                    return next(err);
+            User.updateUserById(document_id,
+                {
+                    doc: {
+                        pass: passhash,
+                        retrieve_key: null,
+                        retrieve_time: null,
+                        active: true
+                    }
+                }, function (err) {
+                    if (err) {
+                        return next(err);
+                    }
+                    return res.render('notify/notify', {success: '你的密码已重置。'});
                 }
-                return res.render('notify/notify', {success: '你的密码已重置。'});
-            });
+            )
+            ;
         }));
     }));
 };
