@@ -37,7 +37,11 @@ exports.index = function (req, res, next) {
     }
 
     var limit = config.list_topic_count;
-    var options = {skip: (page - 1) * limit, limit: limit, sort: '-top -last_reply_at'};
+    var options = {
+        from: (page - 1) * limit, size: limit,
+        sort: [{"top": {"order": "desc", "ignore_unmapped": true}},
+            {"last_reply_at": {"order": "desc", "ignore_unmapped": true}}]
+    };
 
     Topic.getTopicsByQuery(query, options, proxy.done('topics', function (topics) {
         return topics;
@@ -49,9 +53,13 @@ exports.index = function (req, res, next) {
             proxy.emit('tops', tops);
         } else {
             User.getUsersByQuery(
-                {is_block: false},
-                {limit: 10, sort: '-score'},
-                proxy.done('tops', function (tops) {
+                'is_block: false',
+                {size: 10, sort: {score: {sort: 'desc'}}},
+                proxy.done('tops', function (result) {
+                    tops_result = result['hits']['hits'];
+                    for (var i = 0; i < tops_result.length; i++) {
+                        tops.push(tops_result[i]['_source']);
+                    }
                     cache.set('tops', tops, 60 * 1);
                     return tops;
                 })
@@ -67,7 +75,7 @@ exports.index = function (req, res, next) {
         } else {
             Topic.getTopicsByQuery(
                 {reply_count: 0, tab: {$ne: 'job'}},
-                {limit: 5, sort: '-create_at'},
+                {size: 5, sort: [{"create_at": {"order": "desc", "ignore_unmapped": true}}]},
                 proxy.done('no_reply_topics', function (no_reply_topics) {
                     cache.set('no_reply_topics', no_reply_topics, 60 * 1);
                     return no_reply_topics;

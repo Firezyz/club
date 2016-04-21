@@ -57,6 +57,8 @@ var config = {
     // 话题列表显示的话题数量
     list_topic_count: 20,
 
+    list_reply_count: 50,
+
     // 管理员话题列表显示的话题数量
     admin_list_topic_count: 50,
 

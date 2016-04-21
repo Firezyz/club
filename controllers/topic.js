@@ -79,7 +79,7 @@ exports.index = function (req, res, next) {
         ep.emit('topic', topic);
 
         // get other_topics
-        var options = {limit: 5, sort: '-last_reply_at'};
+        var options = {size: 5, sort: [{"last_reply_at": {"order": "desc", "ignore_unmapped": true}}]};
         var query = {author_id: topic.author_id, _id: {'$nin': [topic._id]}};
         Topic.getTopicsByQuery(query, options, ep.done('other_topics'));
 
@@ -90,7 +90,7 @@ exports.index = function (req, res, next) {
             } else {
                 Topic.getTopicsByQuery(
                     {reply_count: 0, tab: {$ne: 'job'}},
-                    {limit: 5, sort: '-create_at'},
+                    {size: 5, sort: [{"create_at": {"order": "desc", "ignore_unmapped": true}}]},
                     ep.done('no_reply_topics', function (no_reply_topics) {
                         cache.set('no_reply_topics', no_reply_topics, 60 * 1);
                         return no_reply_topics;

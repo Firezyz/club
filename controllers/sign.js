@@ -1,6 +1,7 @@
 var validator = require('validator');
 var eventproxy = require('eventproxy');
 var config = require('../config');
+var UserModel = require('../models/user');
 var User = require('../proxy').User;
 var mail = require('../common/mail');
 var tools = require('../common/tools');
@@ -205,6 +206,10 @@ exports.activeAccount = function (req, res, next) {
         user = users[0]['_source'];
         document_id = users[0]['_id'];
         var passhash = user.pass;
+        console.info('[active user] ' + user);
+        console.info('[active user] ' + key);
+        console.info('[active user] ' + utility.md5(user.email + passhash + config.session_secret));
+
         if (!user || utility.md5(user.email + passhash + config.session_secret) !== key) {
             return res.render('notify/notify', {error: '信息有误，帐号无法被激活。'});
         }

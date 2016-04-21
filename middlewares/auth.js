@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var UserModel = mongoose.model('User');
+var User = require('../models/user');
 var Message = require('../proxy').Message;
 var config = require('../config');
 var eventproxy = require('eventproxy');

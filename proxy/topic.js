@@ -3,9 +3,19 @@ var models = require('../models');
 var Topic = models.Topic;
 var User = require('./user');
 var Reply = require('./reply');
+var DB = require('../proxy/db');
 var tools = require('../common/tools');
 var at = require('../common/at');
 var _ = require('lodash');
+
+var elasticsearch = require('elasticsearch');
+var config = require('../config');
+
+var client = new elasticsearch.Client({
+    host: config.es_host + ':' + config.es_port,
+    log: config.es_log
+});
+client.indices.create({index: config.es_index});
 
 
 /**
@@ -58,8 +68,22 @@ exports.getTopicById = function (id, callback) {
  * @param {Function} callback 回调函数
  */
 exports.getCountByQuery = function (query, callback) {
-    Topic.count(query, callback);
+    query_dict = {
+        index: config.es_index,
+        body: query
+    }
+    client.count(query_dict, callback);
+    //Topic.count(query, callback);
 };
+
+exports.updateTopicByQuery = function (query, update, callback) {
+    client.update({
+        index: config.es_index,
+        type: 'user',
+        id: id,
+        body: update
+    }, callback)
+}
 
 /**
  * 根据关键词，获取主题列表
@@ -70,9 +94,15 @@ exports.getCountByQuery = function (query, callback) {
  * @param {Object} opt 搜索选项
  * @param {Function} callback 回调函数
  */
-exports.getTopicsByQuery = function (query, opt, callback) {
-    query.deleted = false;
-    Topic.find(query, {}, opt, function (err, topics) {
+exports.searchByFieldList = function (field, fieldList, opt, type, callback) {
+    DB.searchModelByList(field, fieldList, opt, type, function (err, result) {
+        console.info('[ searchModelByList ] ' + result);
+        topics = result['hits']['hits'];
+
+
+        //cghgfjkj
+        //为啥突然借不到正确返回了
+
         if (err) {
             return callback(err);
         }
@@ -89,6 +119,60 @@ exports.getTopicsByQuery = function (query, opt, callback) {
 
         topics.forEach(function (topic, i) {
             var ep = new EventProxy();
+            topic = topic['_source'];
+            ep.all('author', 'reply', function (author, reply) {
+                // 保证顺序
+                // 作者可能已被删除
+                if (author) {
+                    topic.author = author;
+                    topic.reply = reply;
+                } else {
+                    topics[i] = null;
+                }
+                proxy.emit('topic_ready');
+            });
+
+            User.getUserById(topic.author_id, ep.done('author'));
+            // 获取主题的最后回复
+            Reply.getReplyById(topic.last_reply, ep.done('reply'));
+        });
+    });
+
+}
+
+exports.getTopicsByQuery = function (query, opt, callback) {
+    query_dict = {
+        index: config.es_index,
+        body: query
+    }
+    for (key in opt) {
+        query_dict[key] = opt[key];
+    }
+
+    client.search(query_dict, function (err, result) {
+        console.error('------------');
+        console.error(err);
+        console.error(query_dict);
+        console.error(result);
+        console.error('------------');
+        topics = result['hits']['hits'];
+        if (err) {
+            return callback(err);
+        }
+        if (topics.length === 0) {
+            return callback(null, []);
+        }
+
+        var proxy = new EventProxy();
+        proxy.after('topic_ready', topics.length, function () {
+            topics = _.compact(topics); // 删除不合规的 topic
+            return callback(null, topics);
+        });
+        proxy.fail(callback);
+
+        topics.forEach(function (topic, i) {
+            var ep = new EventProxy();
+            topic = topic['_source'];
             ep.all('author', 'reply', function (author, reply) {
                 // 保证顺序
                 // 作者可能已被删除
@@ -110,7 +194,7 @@ exports.getTopicsByQuery = function (query, opt, callback) {
 
 // for sitemap
 exports.getLimit5w = function (callback) {
-    Topic.find({deleted: false}, '_id', {limit: 50000, sort: '-create_at'}, callback);
+    Topic.find({deleted: false}, '_id', {size: 50000, sort: '-create_at'}, callback);
 };
 
 /**

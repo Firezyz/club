@@ -7,6 +7,58 @@ var client = new elasticsearch.Client({
 });
 
 
+client.indices.create({index: 'test'});
+
+client.indices.putMapping({
+    index: 'test',
+    type: 'article',
+    body: {
+        article: {
+            properties: {
+                title: {
+                    type: 'string',
+                    term_vector: 'with_positions_offsets',
+                    analyzer: 'ik_syno',
+                    search_analyzer: 'ik_syno',
+                },
+                content: {
+                    type: 'string',
+                    term_vector: 'with_positions_offsets',
+                    analyzer: 'ik_syno',
+                    search_analyzer: 'ik_syno',
+                },
+                tags: {type: 'string', term_vector: 'no', analyzer: 'ik_syno', search_analyzer: 'ik_syno',},
+                slug: {type: 'string', term_vector: 'no',},
+                update_date: {type: 'date', term_vector: 'no', index: 'no',}
+            }
+        }
+    }
+});
+
+
+client.index({
+    index: 'test',
+    type: 'article',
+    id: '100',
+    body: {
+        title: '什么是 JS？',
+        slug: 'what-is-js',
+        tags: ['JS', 'JavaScript', 'TEST'],
+        content: 'JS 是 JavaScript 的缩写！',
+        update_date: '2015-12-15T13:05:55Z'
+    }
+});
+
+
+client.search({index: 'test', type: 'article', q: 'JS',}).then(function (data) {
+    console.log('result:');
+    console.log(JSON.stringify(data));
+}, function (err) {
+    console.log('error:');
+    console.log(err);
+});
+
+
 //client.search({
 //    index: config.es_index,
 //    q: 'email:zhangsan@qq.com'
@@ -15,36 +67,64 @@ var client = new elasticsearch.Client({
 //    console.error(response);
 //    console.log("==================");
 //});
+//
+//email = 'zhangsan@qq.com';
+//emails = email.split('@');
+//
+//
+//client.search({
+//    index: config.es_index,
+//    type: 'user',
+//    body: {
+//        //loginname: ['zhangyuzhu', 'xuwenqi']
+//        // query: { match_all: {loginname:'zhangyuzhu',login} }
+//        "query": {
+//            bool: {should: [{term: {_id: 'AVPG3nA6pLVGK5FESIO2'}}, {term: {_id: 'AVPGwYaRpLVGK5FESHfw'}}]}
+//        }
+//    }
+//}, function (res) {
+//    console.log(res);
+//});
 
-email = 'zhangsan@qq.com';
-emails = email.split('@');
+//client.search({
+//    index: config.es_index,
+//    type:"reply",
+//    "q": "author_id:AVPGwYaRpLVGK5FESHfw",
+//    "size": 20,
+//    "sort": [{creat_at:{
+//        order: 'desc'
+//    }}]
+//
+//},function(result){
+//    console.log(result);
+//});
 
-client.search({
-    index: config.es_index,
-    body: {
-        query: {
-            bool: {
-                must: [
-                    {
-                        term: {
-                            email: emails[emails.length - 1]
-                        }
-                    },
-                    {
-                        term: {
-                            email: emails[0]
-                        }
-                    }
-                ]
-
-            }
-        }
-    }
-}, function (error, response) {
-    console.log("==================");
-    console.error(response);
-    console.log("==================");
-});
+//client.search({
+//    index: config.es_index,
+//    body: {
+//        query: {
+//            bool: {
+//                must: [
+//                    {
+//                        term: {
+//                            email: emails[emails.length - 1]
+//                        }
+//                    },
+//                    {
+//                        term: {
+//                            email: emails[0]
+//                        }
+//                    }
+//                ]
+//
+//            }
+//        }
+//    }
+//}, function (error, response) {
+//    console.log("==================");
+//    console.error(response);
+//    console.log("==================");
+//});
 
 
 //client.search({

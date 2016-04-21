@@ -1,3 +1,4 @@
+var DB = require('../proxy/db');
 var User = require('../proxy').User;
 var Topic = require('../proxy').Topic;
 var Reply = require('../proxy').Reply;
@@ -15,15 +16,18 @@ var _ = require('lodash');
 
 exports.index = function (req, res, next) {
     var user_name = req.params.name;
-    User.getUserByLoginName(user_name, function (err, user) {
-        if (err) {
-            return next(err);
-        }
-        if (!user) {
+    User.getUserByLoginName(user_name, function (err, result) {
+        users = result['hits']['hits'];
+        if (users.length == 0) {
             res.render404('这个用户不存在。');
             return;
         }
+        if (err) {
+            return next(err);
+        }
 
+        user = users[0]['_source'];
+        user_id = users[0]['_id'];
         var render = function (recent_topics, recent_replies) {
             user.url = (function () {
                 if (user.url && user.url.indexOf('http') !== 0) {
@@ -41,7 +45,7 @@ exports.index = function (req, res, next) {
                 recent_topics: recent_topics,
                 recent_replies: recent_replies,
                 token: token,
-                pageTitle: util.format('@%s 的个人主页', user.loginname),
+                pageTitle: util.format('@%s 的个人主页', user.loginname)
             });
         };
 
@@ -49,39 +53,73 @@ exports.index = function (req, res, next) {
         proxy.assign('recent_topics', 'recent_replies', render);
         proxy.fail(next);
 
-        var query = {author_id: user._id};
-        var opt = {limit: 5, sort: '-create_at'};
-        Topic.getTopicsByQuery(query, opt, proxy.done('recent_topics'));
+        var query = {
+            query: {
+                bool: {
+                    must: [
+                        {term: {author_id: user_id}},
+                        {term: {deleted: false}}
+                    ]
+                }
+            }
+        }
+        //var opt = {limit: 5, sort: '-create_at'};
+        var opt = {
+            size: 5
+            //sort: [{"create_at": {"order": "desc", "ignore_unmapped": true}}]
+        };
+        Topic.getTopicsByQuery(query, opt, function (err, result) {
+            if (result.length === 0) {
+                console.warn('no replies');
+            }
+            proxy.done('recent_topics')
+        });
 
-        Reply.getRepliesByAuthorId(user._id, {limit: 20, sort: '-create_at'},
-            proxy.done(function (replies) {
+        Reply.getRepliesByAuthorId(user_id, {
+                size: 20
+                //sort: [{"create_at": {"order": "desc", "ignore_unmapped": true}}]
+            },
+            proxy.done(function (result) {
+                replies = result['hits']['hits'];
                 var topic_ids = [];
                 for (var i = 0; i < replies.length; i++) {
-                    if (topic_ids.indexOf(replies[i].topic_id.toString()) < 0) {
-                        topic_ids.push(replies[i].topic_id.toString());
+                    if (topic_ids.indexOf(replies[i]['_source'].topic_id.toString()) < 0) {
+                        topic_ids.push(replies[i]['_source'].topic_id.toString());
                     }
                 }
                 var query = {_id: {'$in': topic_ids}};
-                var opt = {limit: 5, sort: '-create_at'};
-                Topic.getTopicsByQuery(query, opt, proxy.done('recent_replies'));
+                var opt = {size: 5, sort: [{"create_at": {"order": "desc", "ignore_unmapped": true}}]};
+                proxy.done('recent_replies');
+                //DB.searchModelByList('_id', topic_ids, opt, proxy.done('recent_replies'));
+                Topic.searchByFieldList('_id', topic_ids, opt, proxy.done('recent_replies'));
             }));
     });
 };
 
 exports.listStars = function (req, res, next) {
-    User.getUsersByQuery({is_star: true}, {}, function (err, stars) {
+    User.getUsersByQuery('is_star: true', {}, function (err, result) {
         if (err) {
             return next(err);
+        }
+        result_stars = result[hits][hits];
+        stars = [];
+        for (star in result_stars) {
+            stars.push(star['_source']);
         }
         res.render('user/stars', {stars: stars});
     });
 };
 
 exports.showSetting = function (req, res, next) {
-    User.getUserById(req.session.user._id, function (err, user) {
+    User.getUserById(req.session.user._id, function (err, result) {
         if (err) {
             return next(err);
         }
+        users = result['hits']['hits'];
+        if (users.length === 0) {
+            return next(err);
+        }
+        user = users[0]['_source'];
         if (req.query.save === 'success') {
             user.success = '保存成功。';
         }
@@ -104,7 +142,7 @@ exports.setting = function (req, res, next) {
             location: data.location,
             signature: data.signature,
             weibo: data.weibo,
-            accessToken: data.accessToken,
+            accessToken: data.accessToken
         };
         if (isSuccess) {
             data2.success = msg;
@@ -122,12 +160,15 @@ exports.setting = function (req, res, next) {
         var weibo = validator.trim(req.body.weibo);
         var signature = validator.trim(req.body.signature);
 
-        User.getUserById(req.session.user._id, ep.done(function (user) {
-            user.url = url;
-            user.location = location;
-            user.signature = signature;
-            user.weibo = weibo;
-            user.save(function (err) {
+        User.getUserById(req.session.user._id, ep.done(function (result) {
+            user = result['hits']['hits'][0]['_source'];
+
+            User.updateUserById(req.session.user._id, {
+                url: url,
+                location: location,
+                signature: signature,
+                weibo: weibo
+            }, function (err) {
                 if (err) {
                     return next(err);
                 }
@@ -143,7 +184,8 @@ exports.setting = function (req, res, next) {
             return res.send('旧密码或新密码不得为空');
         }
 
-        User.getUserById(req.session.user._id, ep.done(function (user) {
+        User.getUserById(req.session.user._id, ep.done(function (result) {
+            user = result['hits']['hits'][0]['_source'];
             tools.bcrypt_compare(old_pass, user.pass, ep.done(function (bool) {
                 if (!bool) {
                     return showMessage('当前密码不正确。', user);
@@ -151,12 +193,11 @@ exports.setting = function (req, res, next) {
 
                 tools.bcrypt_hash(new_pass, ep.done(function (passhash) {
                     user.pass = passhash;
-                    user.save(function (err) {
+                    User.updateUserById(req.session.user._id, {pass: passhash}, function (err) {
                         if (err) {
                             return next(err);
                         }
                         return showMessage('密码已被修改。', user, true);
-
                     });
                 }));
             }));
@@ -166,15 +207,18 @@ exports.setting = function (req, res, next) {
 
 exports.toggleStar = function (req, res, next) {
     var user_id = req.body.user_id;
-    User.getUserById(user_id, function (err, user) {
+    User.getUserById(user_id, function (err, result) {
         if (err) {
             return next(err);
         }
-        if (!user) {
+        users = result['hits']['hits'];
+        if (users.length === 0) {
             return next(new Error('user is not exists'));
         }
-        user.is_star = !user.is_star;
-        user.save(function (err) {
+        user = users[0]['_source'];
+
+        isStar = !user.is_star;
+        User.updateUserById(user_id, {is_star: isStar}, function (err) {
             if (err) {
                 return next(err);
             }
@@ -185,11 +229,13 @@ exports.toggleStar = function (req, res, next) {
 
 exports.listCollectedTopics = function (req, res, next) {
     var name = req.params.name;
-    User.getUserByLoginName(name, function (err, user) {
-        if (err || !user) {
+    User.getUserByLoginName(name, function (err, result) {
+        users = result['hits']['hits'];
+        if (err || users.length === 0) {
             return next(err);
         }
-
+        user = users[0]['_source'];
+        user_id = users[0]['_id'];
         var page = Number(req.query.page) || 1;
         var limit = config.list_topic_count;
 
@@ -205,16 +251,17 @@ exports.listCollectedTopics = function (req, res, next) {
         var proxy = EventProxy.create('topics', 'pages', render);
         proxy.fail(next);
 
-        TopicCollect.getTopicCollectsByUserId(user._id, proxy.done(function (docs) {
+        TopicCollect.getTopicCollectsByUserId(user_id, proxy.done(function (result) {
+            docs = result['hits']['hits'];
             var ids = [];
             for (var i = 0; i < docs.length; i++) {
-                ids.push(docs[i].topic_id);
+                ids.push(docs[i]['_source'].topic_id);
             }
-            var query = {_id: {'$in': ids}};
+            //var query = {_id: {'$in': ids}};
             var opt = {
-                skip: (page - 1) * limit,
-                limit: limit,
-                sort: '-create_at'
+                from: (page - 1) * limit,
+                size: limit,
+                sort: [{"create_at": {"order": "desc", "ignore_unmapped": true}}]
             };
             Topic.getTopicsByQuery(query, opt, proxy.done('topics'));
             Topic.getCountByQuery(query, proxy.done(function (all_topics_count) {
@@ -226,14 +273,19 @@ exports.listCollectedTopics = function (req, res, next) {
 };
 
 exports.top100 = function (req, res, next) {
-    var opt = {limit: 100, sort: '-score'};
-    User.getUsersByQuery({is_block: false}, opt, function (err, tops) {
+    var opt = {size: 100, sort: {score: {sort: 'desc'}}};
+    User.getUsersByQuery('is_block: false', opt, function (err, result) {
         if (err) {
             return next(err);
         }
+        result_tops = result['hits']['hits'];
+        tops = []
+        for (var i = 0; i < result_tops.length; i++) {
+            tops.push(result_tops[i]);
+        }
         res.render('user/top100', {
             users: tops,
-            pageTitle: 'top100',
+            pageTitle: 'top100'
         });
     });
 };
@@ -243,12 +295,14 @@ exports.listTopics = function (req, res, next) {
     var page = Number(req.query.page) || 1;
     var limit = config.list_topic_count;
 
-    User.getUserByLoginName(user_name, function (err, user) {
-        if (!user) {
+    User.getUserByLoginName(user_name, function (err, result) {
+        users = result['hits']['hits'];
+        if (users.length === 0) {
             res.render404('这个用户不存在。');
             return;
         }
-
+        user = users[0]['_source'];
+        user_id = users[0]['_id'];
         var render = function (topics, pages) {
             res.render('user/topics', {
                 user: user,
@@ -262,8 +316,17 @@ exports.listTopics = function (req, res, next) {
         proxy.assign('topics', 'pages', render);
         proxy.fail(next);
 
-        var query = {'author_id': user._id};
-        var opt = {skip: (page - 1) * limit, limit: limit, sort: '-create_at'};
+        //var query = {'author_id': user_id};
+        var query = {
+            "query": {
+                bool: {must: [{term: {author_id: user_id}}]}
+            }
+        }
+        var opt = {
+            from: (page - 1) * limit,
+            size: limit,
+            sort: [{"create_at": {"order": "desc", "ignore_unmapped": true}}]
+        };
         Topic.getTopicsByQuery(query, opt, proxy.done('topics'));
 
         Topic.getCountByQuery(query, proxy.done(function (all_topics_count) {
@@ -276,14 +339,16 @@ exports.listTopics = function (req, res, next) {
 exports.listReplies = function (req, res, next) {
     var user_name = req.params.name;
     var page = Number(req.query.page) || 1;
-    var limit = 50;
+    var limit = config.list_reply_count;
 
-    User.getUserByLoginName(user_name, function (err, user) {
-        if (!user) {
+    User.getUserByLoginName(user_name, function (err, result) {
+        users = result['hits']['hits'];
+        if (users.length === 0) {
             res.render404('这个用户不存在。');
             return;
         }
-
+        user = users[0]['_source'];
+        user_id = users[0]['_id'];
         var render = function (topics, pages) {
             res.render('user/replies', {
                 user: user,
@@ -297,18 +362,31 @@ exports.listReplies = function (req, res, next) {
         proxy.assign('topics', 'pages', render);
         proxy.fail(next);
 
-        var opt = {skip: (page - 1) * limit, limit: limit, sort: '-create_at'};
-        Reply.getRepliesByAuthorId(user._id, opt, proxy.done(function (replies) {
+        var opt = {from: (page - 1) * limit, size: limit, sort: {create_at: {sort: 'desc'}}};
+        Reply.getRepliesByAuthorId(user_id, opt, proxy.done(function (result) {
+            replies = result['hits']['hits'];
+
             // 获取所有有评论的主题
             var topic_ids = replies.map(function (reply) {
-                return reply.topic_id;
+                return reply['_source'].topic_id;
             });
             topic_ids = _.uniq(topic_ids);
-            var query = {'_id': {'$in': topic_ids}};
+            //var query = {'_id': {'$in': topic_ids}};
+            var query = {
+                query: {
+                    "filtered": {
+                        "filter": {
+                            "terms": {
+                                "_id": topic_ids
+                            }
+                        }
+                    }
+                }
+            }
             Topic.getTopicsByQuery(query, {}, proxy.done('topics'));
         }));
 
-        Reply.getCountByAuthorId(user._id, proxy.done('pages', function (count) {
+        Reply.getCountByAuthorId(user_id, proxy.done('pages', function (count) {
             var pages = Math.ceil(count / limit);
             return pages;
         }));
@@ -322,22 +400,25 @@ exports.block = function (req, res, next) {
     var ep = EventProxy.create();
     ep.fail(next);
 
-    User.getUserByLoginName(loginname, ep.done(function (user) {
-        if (!user) {
+    User.getUserByLoginName(loginname, ep.done(function (result) {
+        users = result['hits']['hits'];
+        if (users.length === 0) {
             return next(new Error('user is not exists'));
         }
+        user = users[0]['_source'];
+        user_id = users[0]['_id'];
         if (action === 'set_block') {
             ep.all('block_user',
                 function (user) {
                     res.json({status: 'success'});
                 });
-            user.is_block = true;
-            user.save(ep.done('block_user'));
+            //user.is_block = true;
+            User.updateUserById(user_id, {is_block: true}, ep.done('block_user'));
+            //user.save(ep.done('block_user'));
 
         } else if (action === 'cancel_block') {
             user.is_block = false;
-            user.save(ep.done(function () {
-
+            User.updateUserById(user_id, {is_block: false}, ep.done(function () {
                 res.json({status: 'success'});
             }));
         }
@@ -350,19 +431,23 @@ exports.deleteAll = function (req, res, next) {
     var ep = EventProxy.create();
     ep.fail(next);
 
-    User.getUserByLoginName(loginname, ep.done(function (user) {
-        if (!user) {
+    User.getUserByLoginName(loginname, ep.done(function (result) {
+        users = result['hits']['hits'];
+        if (users.length === 0) {
             return next(new Error('user is not exists'));
         }
         ep.all('del_topics', 'del_replys', 'del_ups',
             function () {
                 res.json({status: 'success'});
             });
+        DB.updateModelByQ('author_id:' + user._id, 'user', {deleted: true}, ep.done('del_topics'));
+        DB.updateModelByQ('author_id:' + user._id, 'reply', {deleted: true}, ep.done('del_replys'));
+        DB.deleteModelByQ('author_id:' + user._id, 'user', ep.done('del_topics'));
         // 删除主题
-        TopicModel.update({author_id: user._id}, {$set: {deleted: true}}, {multi: true}, ep.done('del_topics'));
+        //TopicModel.update({author_id: user._id}, {$set: {deleted: true}}, {multi: true}, ep.done('del_topics'));
         // 删除评论
-        ReplyModel.update({author_id: user._id}, {$set: {deleted: true}}, {multi: true}, ep.done('del_replys'));
+        //ReplyModel.update({author_id: user._id}, {$set: {deleted: true}}, {multi: true}, ep.done('del_replys'));
         // 点赞数也全部干掉
-        ReplyModel.update({}, {$pull: {'ups': user._id}}, {multi: true}, ep.done('del_ups'));
+        //ReplyModel.update({}, {$pull: {'ups': user._id}}, {multi: true}, ep.done('del_ups'));
     }));
 };

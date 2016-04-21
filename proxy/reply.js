@@ -5,6 +5,14 @@ var tools = require('../common/tools');
 var User = require('./user');
 var at = require('../common/at');
 
+var elasticsearch = require('elasticsearch');
+var config = require('../config');
+
+var client = new elasticsearch.Client({
+    host: config.es_host + ':' + config.es_port,
+    log: config.es_log
+});
+
 /**
  * 获取一条回复信息
  * @param {String} id 回复ID
@@ -26,20 +34,26 @@ exports.getReplyById = function (id, callback) {
     if (!id) {
         return callback(null, null);
     }
-    Reply.findOne({_id: id}, function (err, reply) {
+    client.search({
+        index: config.es_index,
+        q: 'id:' + id
+    }, function (err, result) {
+        replies = result['hits']['hits'];
         if (err) {
             return callback(err);
         }
-        if (!reply) {
+        if (replies.length === 0) {
             return callback(err, null);
         }
+        reply = replies[0]['_source'];
 
         var author_id = reply.author_id;
-        User.getUserById(author_id, function (err, author) {
+        User.getUserById(author_id, function (err, result) {
+            authors = result['hits']['hits']
             if (err) {
                 return callback(err);
             }
-            reply.author = author;
+            reply.author = authors[0]['_source'];
             // TODO: 添加更新方法，有些旧帖子可以转换为markdown格式的内容
             if (reply.content_is_html) {
                 return callback(null, reply);
@@ -136,14 +150,31 @@ exports.getLastReplyByTopId = function (topicId, callback) {
 };
 
 exports.getRepliesByAuthorId = function (authorId, opt, callback) {
+    query_dict = {
+        index: config.es_index,
+        type: 'reply',
+        q: 'author_id:' + authorId
+    }
+    for (key in opt) {
+        query_dict[key] = opt[key]
+    }
+
     if (!callback) {
         callback = opt;
         opt = null;
     }
-    Reply.find({author_id: authorId}, {}, opt, callback);
+    client.search(query_dict, callback);
+    //Reply.find({author_id: authorId}, {}, opt, callback);
 };
 
 // 通过 author_id 获取回复总数
 exports.getCountByAuthorId = function (authorId, callback) {
-    Reply.count({author_id: authorId}, callback);
+    query_dict = {
+        index: config.es_index,
+        type: 'reply',
+        q: 'author_id:' + authorId
+    }
+    client.count(query_dict, callback);
+
+    //Reply.count({author_id: authorId}, callback);
 };

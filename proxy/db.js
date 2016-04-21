@@ -1,5 +1,5 @@
-var models = require('../models');
-var UserModel = require('../models/user');
+//var models = require('../models');
+//var User = models.User;
 var utility = require('utility');
 var uuid = require('node-uuid');
 
@@ -11,6 +11,7 @@ var client = new elasticsearch.Client({
     log: config.es_log
 });
 client.indices.create({index: config.es_index});
+
 
 //client.indices.putMapping({
 //    index: config.es_index,
@@ -69,6 +70,68 @@ client.indices.create({index: config.es_index});
 //    }
 //});
 
+exports.deleteModelByQ = function (q, type, callback) {
+    client.search({
+        index: config.es_index,
+        type: type,
+        q: q
+    }, function (err, result) {
+        models = result['hits']['hits'];
+        if (models.length === 0) {
+            return callback('no model hits', {});
+        }
+        opt = [];
+        for (var i = 0; i < models.length; i++) {
+            opt.push({delete: {_index: config.es_index, _type: type, _id: models[i]['_id']}})
+        }
+        client.bulk({
+            body: opt
+        }, callback);
+
+    })
+}
+
+exports.updateModelByQ = function (q, type, update, callback) {
+    client.search({
+        index: config.es_index,
+        type: type,
+        q: q
+    }, function (err, result) {
+        models = result['hits']['hits'];
+        if (models.length === 0) {
+            return callback('no model hits', {});
+        }
+        opt = [];
+        for (var i = 0; i < models.length; i++) {
+            opt.push({
+                update: {_index: config.es_index, _type: type, _id: models[i]['_id'], body: {doc: update}}
+            })
+        }
+        client.bulk({
+            body: opt
+        }, callback);
+
+    })
+}
+
+exports.searchModelByList = function (field, fieldList, opt, type, callback) {
+    query_dict = {
+        index: config.es_index,
+        type: type,
+        body: {
+            query: {
+                bool: {should: []}
+            }
+        }
+    }
+    for (var i = 0; i < fieldList.length; i++) {
+        var condition = {};
+        condition[field] = fieldList[i];
+        query_dict['body']['query']['bool']['should'].push(condition);
+    }
+    console.info('[ searchModelByList ] ' + query_dict);
+    client.search(query_dict, callback);
+}
 
 /**
  * 根据用户名列表查找用户列表
@@ -247,19 +310,19 @@ exports.getUserByNameAndKey = function (loginname, key, callback) {
 };
 
 exports.newAndSave = function (name, loginname, pass, email, avatar_url, active, callback) {
-    var user = UserModel.createUser();
-    user.name = name;
-    user.loginname = loginname;
-    user.pass = pass;
-    user.email = email;
-    user.avatar = avatar_url;
-    user.active = active || false;
-    user.accessToken = uuid.v4();
     client.index({
         index: config.es_index,
         type: 'user',
         //id: '1',
-        body: user
+        body: {
+            name: loginname,
+            loginname: loginname,
+            pass: pass,
+            email: email,
+            avatar: avatar_url,
+            active: active || false,
+            accessToken: uuid.v4()
+        }
     }, callback);
 };
 
