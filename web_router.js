@@ -1,7 +1,3 @@
-/**
- * Module dependencies.
- */
-
 var express = require('express');
 var sign = require('./controllers/sign');
 var site = require('./controllers/site');
@@ -9,15 +5,11 @@ var user = require('./controllers/user');
 var message = require('./controllers/message');
 var topic = require('./controllers/topic');
 var reply = require('./controllers/reply');
-//var rss = require('./controllers/rss');
-var staticController = require('./controllers/static');
 var auth = require('./middlewares/auth');
 var limit = require('./middlewares/limit');
-//var github = require('./controllers/github');
 var search = require('./controllers/search');
 var manage = require('./controllers/manage');
 var passport = require('passport');
-var configMiddleware = require('./middlewares/conf');
 var config = require('./config');
 var admin = require('./controllers/admin')
 
@@ -25,18 +17,6 @@ var router = express.Router();
 
 // home page
 router.get('/', site.index);
-// sitemap
-//router.get('/sitemap.xml', site.sitemap);
-// mobile app download
-//router.get('/app/download', site.appDownload);
-
-// sign controller
-/*if (config.allow_sign_up) {
-    router.get('/signup', sign.showSignup);  // 跳转到注册页面
-    router.post('/signup', sign.signup);  // 提交注册信息
-} else {
-    router.get('/signup', configMiddleware.github, passport.authenticate('github'));  // 进行github验证
-}*/
 
 router.get('/admin', auth.adminRequired, admin.showAdmin); // 跳转到管理员页面
 
@@ -96,24 +76,6 @@ router.post('/reply/:reply_id/edit', auth.userRequired, reply.update); // 修改
 router.post('/reply/:reply_id/delete', auth.userRequired, reply.delete); // 删除某评论
 router.post('/reply/:reply_id/up', auth.userRequired, reply.up); // 为评论点赞
 router.post('/upload', auth.userRequired, topic.upload); //上传图片
-
-// static
-router.get('/about', staticController.about);
-router.get('/faq', staticController.faq);
-router.get('/getstart', staticController.getstart);
-router.get('/robots.txt', staticController.robots);
-router.get('/api', staticController.api);
-
-//rss
-//router.get('/rss', rss.index);
-
-// github oauth
-//router.get('/auth/github', configMiddleware.github, passport.authenticate('github'));
-//router.get('/auth/github/callback',
-//    passport.authenticate('github', {failureRedirect: '/signin'}),
-//    github.callback);
-//router.get('/auth/github/new', github.new);
-//router.post('/auth/github/create', github.create);
 
 router.get('/search', search.index);
 
