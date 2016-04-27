@@ -8,10 +8,6 @@ var config = {
     // debug 为 true 时，用于本地调试
     debug: true,
 
-    //get mini_assets() {
-    //    return !this.debug;
-    //}, // 是否启用静态文件的合并压缩，详见视图中的Loader
-
     name: 'JLUclub', // 社区名字
     description: 'JLU技术交流社区', // 社区的描述
     keywords: '技术,JLU,吉大',
@@ -38,6 +34,10 @@ var config = {
 
     // mongodb 配置
     db: 'mongodb://127.0.0.1/jlu_club_dev',
+    es_host: 'localhost',
+    es_port: '9200',
+    es_log: 'trace',
+    es_index: 'jlu_dev_test',
 
     // redis 配置，默认是本地
     redis_host: '127.0.0.1',
@@ -52,6 +52,8 @@ var config = {
 
     // 话题列表显示的话题数量
     list_topic_count: 20,
+
+    list_reply_count: 50,
 
     // 管理员话题列表显示的话题数量
     admin_list_topic_count: 50,

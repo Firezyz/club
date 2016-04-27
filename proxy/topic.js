@@ -6,7 +6,44 @@ var Reply = require('./reply');
 var tools = require('../common/tools');
 var at = require('../common/at');
 var _ = require('lodash');
+var config = require('../config');
+var elasticsearch = require('elasticsearch');
 
+var client = new elasticsearch.Client({
+    host: config.es_host + ':' + config.es_port,
+    log: config.es_log
+});
+client.indices.create({index: config.es_index});
+
+client.indices.putMapping({
+    index: config.es_index,
+    type: 'article',
+    body: {
+        article: {
+            properties: {
+                title: {
+                    type: 'string',
+                    term_vector: 'with_positions_offsets',
+                    analyzer: 'ik_syno',
+                    search_analyzer: 'ik_syno',
+                },
+                content: {
+                    type: 'string',
+                    term_vector: 'with_positions_offsets',
+                    analyzer: 'ik_syno',
+                    search_analyzer: 'ik_syno',
+                }
+            }
+        }
+    }
+});
+
+var getEsBody = function () {
+    return {
+        index: config.es_index,
+        type: 'article'
+    };
+}
 
 /**
  * 根据主题ID获取主题
@@ -221,6 +258,16 @@ exports.newAndSave = function (title, content, tab, authorId, callback) {
     topic.content = content;
     topic.tab = tab;
     topic.author_id = authorId;
+    var es_body = getEsBody();
+    es_body['id'] = topic._id;
+    es_body['body'] = {title: title, content: content};
 
-    topic.save(callback);
+    client.index(es_body, function (err) {
+        if (err) {
+            console.error("topic index save failed");
+        } else {
+            topic.save(callback);
+        }
+    });
 };
+

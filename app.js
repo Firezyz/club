@@ -1,9 +1,5 @@
 var config = require('./config');
 
-if (!config.debug && config.oneapm_key) {
-    require('oneapm');
-}
-
 require('colors');
 var path = require('path');
 var Loader = require('loader');
@@ -13,14 +9,12 @@ var session = require('express-session');
 var passport = require('passport');
 require('./middlewares/mongoose_log'); // 打印 mongodb 查询日志
 require('./models');
-//var GitHubStrategy = require('passport-github').Strategy;
-var githubStrategyMiddleware = require('./middlewares/github_strategy');
 var webRouter = require('./web_router');
-var apiRouterV1 = require('./api_router_v1');
+var apiRouter = require('./api_router');
 var auth = require('./middlewares/auth');
 var errorPageMiddleware = require('./middlewares/error_page');
 var proxyMiddleware = require('./middlewares/proxy');
-var RedisStore = require('connect-redis')(session);
+var redis = require('connect-redis')(session);
 var _ = require('lodash');
 var csurf = require('csurf');
 var compress = require('compression');
@@ -36,18 +30,8 @@ var bytes = require('bytes');
 
 
 // 静态文件目录
-var staticDir = path.join(__dirname, 'public');
+var staticDir = path.join(__dirname, 'static');
 // assets
-var assets = {};
-
-if (config.mini_assets) {
-    try {
-        assets = require('./assets.json');
-    } catch (e) {
-        logger.error('You must execute `make build` before start app when mini_assets is true.');
-        throw e;
-    }
-}
 
 var urlinfo = require('url').parse(config.host);
 config.hostname = urlinfo.hostname || config.host;
@@ -73,7 +57,7 @@ if (config.debug) {
 if (config.debug) {
     app.use(LoaderConnect.less(__dirname)); // 测试环境用，编译 .less on the fly
 }
-app.use('/public', express.static(staticDir));
+app.use('/static', express.static(staticDir));
 app.use('/agent', proxyMiddleware.proxy);
 
 // 通用的中间件
@@ -86,7 +70,7 @@ app.use(require('cookie-parser')(config.session_secret));
 app.use(compress());
 app.use(session({
     secret: config.session_secret,
-    store: new RedisStore({
+    store: new redis({
         port: config.redis_port,
         host: config.redis_host,
     }),
@@ -104,7 +88,6 @@ passport.serializeUser(function (user, done) {
 passport.deserializeUser(function (user, done) {
     done(null, user);
 });
-//passport.use(new GitHubStrategy(config.GITHUB_OAUTH, githubStrategyMiddleware));
 
 // custom middleware
 app.use(auth.authUser);
@@ -130,7 +113,6 @@ if (!config.debug) {
 _.extend(app.locals, {
     config: config,
     Loader: Loader,
-    assets: assets
 });
 
 app.use(errorPageMiddleware.errorPage);
@@ -147,7 +129,7 @@ app.use(busboy({
 }));
 
 // routes
-app.use('/api/v1', cors(), apiRouterV1);
+app.use('/api', cors(), apiRouter);
 app.use('/', webRouter);
 
 // error handler
@@ -162,8 +144,7 @@ if (config.debug) {
 
 if (!module.parent) {
     app.listen(config.port, function () {
-        logger.info('NodeClub listening on port', config.port);
-        logger.info('God bless love....');
+        logger.info('Club listening on port', config.port);
         logger.info('You can debug your app with http://' + config.hostname + ':' + config.port);
         logger.info('');
     });
