@@ -3,6 +3,7 @@ var BaseModel = require("./base_model");
 var renderHelper = require('../common/render_helper');
 var Schema = mongoose.Schema;
 var utility = require('utility');
+var config = require('../config');
 var _ = require('lodash');
 
 var UserSchema = new Schema({
@@ -30,7 +31,7 @@ var UserSchema = new Schema({
     collect_topic_count: {type: Number, default: 0},
     create_at: {type: Date, default: Date.now},
     update_at: {type: Date, default: Date.now},
-    is_star: {type: Boolean},
+    is_star: {type: Boolean, default: false},
     level: {type: String},
     active: {type: Boolean, default: false},
     is_admin: {type: Boolean, default: false},
@@ -65,8 +66,7 @@ UserSchema.virtual('avatar_url').get(function () {
 });
 
 UserSchema.virtual('isAdvanced').get(function () {
-    // 积分高于 700 则认为是高级用户
-    return this.score > 700 || this.is_star;
+    return this.score > config.user_is_advance || this.is_star;
 });
 
 UserSchema.index({loginname: 1}, {unique: true});

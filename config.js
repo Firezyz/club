@@ -61,16 +61,6 @@ var config = {
     // 管理员用户列表显示的话题数量
     admin_list_user_count: 50,
 
-    // RSS配置
-    rss: {
-        title: 'JLU技术交流社区',
-        link: 'club.jlu.edu.cn',
-        language: 'zh-cn',
-        description: 'JLU技术交流社区',
-        //最多获取的RSS Item数量
-        max_rss_items: 50
-    },
-
     // 邮箱配置
     mail_opts: {
         host: 'smtp.qq.com',
@@ -141,7 +131,8 @@ var config = {
 
     create_post_per_day: 100, // 每个用户一天可以发的主题数
     create_reply_per_day: 100, // 每个用户一天可以发的评论数
-    visit_per_day: 10000 // 每个 ip 每天能访问的次数
+    visit_per_day: 10000, // 每个 ip 每天能访问的次数
+    user_is_advance : 1,
 };
 
 if (process.env.NODE_ENV === 'test') {

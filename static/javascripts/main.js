@@ -32,10 +32,4 @@ $(document).ready(function () {
         $(this).button('loading');
     });
 
-    // 广告的统计信息
-    $('.sponsor_outlink').click(function () {
-        var $this = $(this);
-        var label = $this.data('label');
-        ga('send', 'event', 'banner', 'click', label, 1.00, {'nonInteraction': 1});
-    });
 });

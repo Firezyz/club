@@ -129,7 +129,7 @@ app.use(busboy({
 }));
 
 // routes
-app.use('/api', cors(), apiRouter);
+//app.use('/api', cors(), apiRouter);
 app.use('/', webRouter);
 
 // error handler

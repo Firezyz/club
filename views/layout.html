@@ -1,121 +1,120 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <!-- meta -->
-  <meta charset="utf-8"/>
-  <meta name='description' content='<%= config.description %>'>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <meta name="keywords" content="<%= config.keywords %>"/>
-  <meta name="apple-itunes-app" content="app-id=954734793">
-  <!-- see http://smerity.com/articles/2013/where_did_all_the_http_referrers_go.html -->
-  <meta name="referrer" content="always">
+    <!-- meta -->
+    <meta charset="utf-8"/>
+    <meta name='description' content='<%= config.description %>'>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="keywords" content="<%= config.keywords %>"/>
+    <meta name="apple-itunes-app" content="app-id=954734793">
+    <!-- see http://smerity.com/articles/2013/where_did_all_the_http_referrers_go.html -->
+    <meta name="referrer" content="always">
 
-  <%
-  var headers = config.site_headers || [];
-  for (var i = 0, l = headers.length; i < l; i++) {
-  %>
-  <%- headers[i] %>
-  <% } %>
+    <%
+    var headers = config.site_headers || [];
+    for (var i = 0, l = headers.length; i < l; i++) {
+    %>
+    <%- headers[i] %>
+    <% } %>
 
-  <link title="RSS" type="application/rss+xml" rel="alternate" href="/rss"/>
+    <% if (config.site_icon) { %>
+    <link rel="icon" href="<%- staticFile(config.site_icon) %>" type="image/x-icon"/>
+    <% } %>
 
-  <% if (config.site_icon) { %>
-  <link rel="icon" href="<%- staticFile(config.site_icon) %>" type="image/x-icon"/>
-  <% } %>
+    <!-- style -->
+    <%- Loader('/static/stylesheets/index.min.css')
+    .css('/static/libs/bootstrap/css/bootstrap.css')
+    .css('/static/stylesheets/common.css')
+    .css('/static/stylesheets/style.less')
+    .css('/static/stylesheets/responsive.css')
+    .css('/static/stylesheets/jquery.atwho.css')
+    .css('/static/libs/editor/editor.css')
+    .css('/static/libs/webuploader/webuploader.css')
+    .css('/static/libs/code-prettify/prettify.css')
+    .css('/static/libs/font-awesome/css/font-awesome.css')
+    .done( config.site_static_host, config.mini_assets)
+    %>
 
-  <!-- style -->
-  <%- Loader('/static/stylesheets/index.min.css')
-  .css('/static/libs/bootstrap/css/bootstrap.css')
-  .css('/static/stylesheets/common.css')
-  .css('/static/stylesheets/style.less')
-  .css('/static/stylesheets/responsive.css')
-  .css('/static/stylesheets/jquery.atwho.css')
-  .css('/static/libs/editor/editor.css')
-  .css('/static/libs/webuploader/webuploader.css')
-  .css('/static/libs/code-prettify/prettify.css')
-  .css('/static/libs/font-awesome/css/font-awesome.css')
-  .done( config.site_static_host, config.mini_assets)
-  %>
+    <!-- scripts -->
+    <%- Loader('/static/index.min.js')
+    .js('/static/libs/jquery-2.1.0.js')
+    .js('/static/libs/lodash.compat.js')
+    .js('/static/libs/jquery-ujs.js')
+    .js('/static/libs/bootstrap/js/bootstrap.js')
+    .js('/static/libs/jquery.caret.js')
+    .js('/static/libs/jquery.atwho.js')
+    .js('/static/libs/markdownit.js')
+    .js('/static/libs/code-prettify/prettify.js')
+    .js('/static/libs/qrcode.js')
+    .js('/static/javascripts/main.js')
+    .js('/static/javascripts/responsive.js')
+    .done(config.site_static_host, config.mini_assets)
+    %>
 
-  <!-- scripts -->
-  <%- Loader('/static/index.min.js')
-  .js('/static/libs/jquery-2.1.0.js')
-  .js('/static/libs/lodash.compat.js')
-  .js('/static/libs/jquery-ujs.js')
-  .js('/static/libs/bootstrap/js/bootstrap.js')
-  .js('/static/libs/jquery.caret.js')
-  .js('/static/libs/jquery.atwho.js')
-  .js('/static/libs/markdownit.js')
-  .js('/static/libs/code-prettify/prettify.js')
-  .js('/static/libs/qrcode.js')
-  .js('/static/javascripts/main.js')
-  .js('/static/javascripts/responsive.js')
-  .done(config.site_static_host, config.mini_assets)
-  %>
-
-  <% if (typeof(topic) !== 'undefined') { %>
-  <title><%= topic.title %> - <%= config.name %></title>
-  <% } else if (typeof(pageTitle) !== 'undefined') { %>
-  <title><%= pageTitle %> - <%= config.name %></title>
-  <% } else { %>
-  <title><%= config.description %></title>
-  <% } %>
-  <meta content="_csrf" name="csrf-param">
-  <meta content="<%= csrf %>" name="csrf-token">
+    <% if (typeof(topic) !== 'undefined') { %>
+    <title><%= topic.title %> - <%= config.name %></title>
+    <% } else if (typeof(pageTitle) !== 'undefined') { %>
+    <title><%= pageTitle %> - <%= config.name %></title>
+    <% } else { %>
+    <title><%= config.description %></title>
+    <% } %>
+    <meta content="_csrf" name="csrf-param">
+    <meta content="<%= csrf %>" name="csrf-token">
 </head>
 <body>
 <!-- navbar -->
 <div class='navbar'>
-  <div class='navbar-inner'>
-    <div class='container'>
-      <a class='brand' href='/'>
-        <% if (config.site_logo) {%>
-          <img src="<%- staticFile(config.site_logo) %>" />
-        <%} else {%>
-          <%- config.name %>
-        <%}%>
-      </a>
-
-      <form id='search_form' class='navbar-search' action="/search">
-        <input type='text' id='q' name='q' class='search-query span3' value=''/>
-      </form>
-      <ul class='nav pull-right'>
-        <% if (current_user){ %>
-        <li>
-            <a href='/my/messages'>
-              <% if (current_user.messages_count) { %>
-                <span class='big messages_count'><%= current_user.messages_count %></span>
-              <% } %>
-              未读消息
+    <div class='navbar-inner'>
+        <div class='container'>
+            <a class='brand' href='/'>
+                <% if (config.site_logo) {%>
+                <img src="<%- staticFile(config.site_logo) %>"/>
+                <%} else {%>
+                <%- config.name %>
+                <%}%>
             </a>
-        </li>
-        <% } %>
-        <% if (current_user) { %>
-        <li><a href='/setting'>设置</a></li>
-        <li>
-          <a href='/signout' data-method="post" rel="nofollow">退出</a>
-        </li>
-        <% } else { %>
-        <li><a href='/signup'>注册</a></li>
-        <li><a href='/signin'>登录</a></li>
-        <% } %>
-      </ul>
-      <a class="btn btn-navbar" id="responsive-sidebar-trigger">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </a>
+
+            <form id='search_form' class='navbar-search' action="/search">
+                <input type='text' id='q' name='q' class='search-query span3' value=''/>
+            </form>
+            <ul class='nav pull-right'>
+                <% if (current_user){ %>
+                <li>
+                    <a href='/my/messages'>
+                        <% if (current_user.messages_count) { %>
+                        <span class='big messages_count'><%= current_user.messages_count %></span>
+                        <% } %>
+                        未读消息
+                    </a>
+                </li>
+                <% } %>
+                <% if (current_user) { %>
+                <li><a href='/setting'>设置</a></li>
+                <li><a href="/user/<%= current_user.loginname %>"><%= current_user.loginname %></a></li>
+                <li>
+                    <a href='/signout' data-method="post" rel="nofollow">退出</a>
+                </li>
+                <% } else { %>
+                <li><a href='/signup'>注册</a></li>
+                <li><a href='/signin'>登录</a></li>
+                <% } %>
+            </ul>
+            <a class="btn btn-navbar" id="responsive-sidebar-trigger">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </a>
+        </div>
     </div>
-  </div>
 </div>
 <div id='main'>
-  <%- body %>
+    <%- body %>
 </div>
 <div id='backtotop'>回到顶部</div>
 <div id='footer'>
-  <div id='footer_main'>
-    firezyz@2016
-  </div>
+    <div id='footer_main'>
+        firezyz@2016
+    </div>
 </div>
 <div id="sidebar-mask"></div>
 </body>
