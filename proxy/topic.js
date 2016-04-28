@@ -259,11 +259,14 @@ exports.newAndSave = function (title, content, tab, authorId, callback) {
     topic.tab = tab;
     topic.author_id = authorId;
     var es_body = getEsBody();
-    es_body['id'] = topic._id;
+    es_body['id'] = topic._id.toString();
     es_body['body'] = {title: title, content: content};
+
+    console.error(es_body);
 
     client.index(es_body, function (err) {
         if (err) {
+            console.error(err);
             console.error("topic index save failed");
         } else {
             topic.save(callback);

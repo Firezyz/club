@@ -35,31 +35,35 @@ exports.index = function (req, res, next) {
     }
 
     var topic_id = req.params.tid;
+    var currentUser = req.session.user;
+
     if (topic_id.length !== 24) {
         return res.render404('此话题不存在或已被删除。');
     }
-    var events = ['topic', 'other_topics', 'no_reply_topics'];
-    var ep = EventProxy.create(events, function (topic, other_topics, no_reply_topics) {
-        res.render('topic/index', {
-            topic: topic,
-            author_other_topics: other_topics,
-            no_reply_topics: no_reply_topics,
-            is_uped: isUped
+    var events = ['topic', 'other_topics', 'no_reply_topics', 'is_collect'];
+    var ep = EventProxy.create(events,
+        function (topic, other_topics, no_reply_topics, is_collect) {
+            res.render('topic/index', {
+                topic: topic,
+                author_other_topics: other_topics,
+                no_reply_topics: no_reply_topics,
+                is_uped: isUped,
+                is_collect: is_collect,
+            });
         });
-    });
 
     ep.fail(next);
 
     Topic.getFullTopic(topic_id, ep.done(function (message, topic, author, replies) {
         if (message) {
-            ep.unbind();
+            logger.error('getFullTopic error topic_id: ' + topic_id)
             return res.renderError(message);
         }
 
         topic.visit_count += 1;
         topic.save();
 
-        topic.author = author;
+        topic.author  = author;
         topic.replies = replies;
 
         // 点赞数排名第三的回答，它的点赞数就是阈值
@@ -79,8 +83,8 @@ exports.index = function (req, res, next) {
         ep.emit('topic', topic);
 
         // get other_topics
-        var options = {limit: 5, sort: '-last_reply_at'};
-        var query = {author_id: topic.author_id, _id: {'$nin': [topic._id]}};
+        var options = { limit: 5, sort: '-last_reply_at'};
+        var query = { author_id: topic.author_id, _id: { '$nin': [ topic._id ] } };
         Topic.getTopicsByQuery(query, options, ep.done('other_topics'));
 
         // get no_reply_topics
@@ -89,8 +93,8 @@ exports.index = function (req, res, next) {
                 ep.emit('no_reply_topics', no_reply_topics);
             } else {
                 Topic.getTopicsByQuery(
-                    {reply_count: 0, tab: {$ne: 'job'}},
-                    {limit: 5, sort: '-create_at'},
+                    { reply_count: 0, tab: {$ne: 'job'}},
+                    { limit: 5, sort: '-create_at'},
                     ep.done('no_reply_topics', function (no_reply_topics) {
                         cache.set('no_reply_topics', no_reply_topics, 60 * 1);
                         return no_reply_topics;
@@ -98,6 +102,12 @@ exports.index = function (req, res, next) {
             }
         }));
     }));
+
+    if (!currentUser) {
+        ep.emit('is_collect', null);
+    } else {
+        TopicCollect.getTopicCollect(currentUser._id, topic_id, ep.done('is_collect'))
+    }
 };
 
 exports.create = function (req, res, next) {
