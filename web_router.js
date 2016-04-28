@@ -1,6 +1,7 @@
 var express = require('express');
 var sign = require('./controllers/sign');
 var site = require('./controllers/site');
+var test = require('./controllers/test');
 var user = require('./controllers/user');
 var message = require('./controllers/message');
 var topic = require('./controllers/topic');
@@ -17,6 +18,7 @@ var router = express.Router();
 
 // home page
 router.get('/', site.index);
+router.get('/test', test.index);
 
 router.get('/admin', auth.adminRequired, admin.showAdmin); // 跳转到管理员页面
 

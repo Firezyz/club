@@ -64,10 +64,11 @@ var config = {
     // 邮箱配置
     mail_opts: {
         host: 'smtp.qq.com',
-        port: 25,
+        secureConnection: true,
+        port: 465,
         auth: {
             user: '1063784603@qq.com',
-            pass: 'yatou521!'
+            pass: 'KLKLsys24678!'
         }
     },
 
