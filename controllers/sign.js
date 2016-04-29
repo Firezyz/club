@@ -65,8 +65,7 @@ exports.signup = function (req, res, next) {
 
         tools.bcrypt_hash(pass, ep.done(function (passhash) {
             // create gravatar
-            var avatarUrl = User.makeGravatar(email);
-            User.newAndSave(loginname, loginname, passhash, email, avatarUrl, false, function (err) {
+            User.newAndSave(loginname, loginname, passhash, email, false, function (err) {
                 if (err) {
                     return next(err);
                 }

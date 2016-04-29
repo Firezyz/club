@@ -1,18 +1,12 @@
-/**
- * config
- */
-
 var path = require('path');
 
 var config = {
-    // debug 为 true 时，用于本地调试
     debug: true,
 
     name: 'JLUclub', // 社区名字
     description: 'JLU技术交流社区', // 社区的描述
     keywords: '技术,JLU,吉大',
 
-    // 添加到 html head 中的信息
     site_headers: [
         '<meta name="author" content="Firezyz@JLU" />'
     ],
@@ -107,11 +101,13 @@ var config = {
     // 文件上传配置
     // 注：如果填写 qn_access，则会上传到 7牛，以下配置无效
     upload: {
-        path: path.join(__dirname, 'public/upload/'),
-        url: '/public/upload/'
+        path: path.join(__dirname, 'static/upload/'),
+        url: '/static/upload/'
     },
 
-    file_limit: '1MB',
+    default_avatar_path: '/static/images/default_avatar.jpg',
+
+    file_limit: '5MB',
 
     // 版块
     tabs: [
@@ -133,7 +129,7 @@ var config = {
     create_post_per_day: 100, // 每个用户一天可以发的主题数
     create_reply_per_day: 100, // 每个用户一天可以发的评论数
     visit_per_day: 10000, // 每个 ip 每天能访问的次数
-    user_is_advance : 1,
+    user_is_advance: 1,
 };
 
 if (process.env.NODE_ENV === 'test') {

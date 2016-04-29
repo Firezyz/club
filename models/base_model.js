@@ -1,7 +1,3 @@
-/**
- * 给所有的 Model 扩展功能
- * http://mongoosejs.com/docs/plugins.html
- */
 var tools = require('../common/tools');
 
 module.exports = function (schema) {

@@ -19,6 +19,7 @@ var sendMail = function (data) {
         if (err) {
             // 写为日志
             logger.error(err);
+            console.error(err);
         }
     });
 };
@@ -39,7 +40,12 @@ exports.sendActiveMail = function (who, token, name) {
         '<a href  = "' + SITE_ROOT_URL + '/active_account?key=' + token + '&name=' + name + '">激活链接</a>' +
         '<p>若您没有在' + config.name + '社区填写过注册信息，说明有人滥用了您的电子邮箱，请删除此邮件，我们对给您造成的打扰感到抱歉。</p>' +
         '<p>' + config.name + '社区 谨上。</p>';
-
+    console.error({
+        from: from,
+        to: to,
+        subject: subject,
+        html: html
+    });
     exports.sendMail({
         from: from,
         to: to,

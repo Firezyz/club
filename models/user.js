@@ -16,16 +16,11 @@ var UserSchema = new Schema({
     signature: {type: String},
     profile: {type: String},
     weibo: {type: String},
-    avatar: {type: String},
-    githubId: {type: String},
-    githubUsername: {type: String},
-    githubAccessToken: {type: String},
+    avatar: {type: String, default: config.default_avatar_path},
     is_block: {type: Boolean, default: false},
     score: {type: Number, default: 0},
     topic_count: {type: Number, default: 0},
     reply_count: {type: Number, default: 0},
-    follower_count: {type: Number, default: 0},
-    following_count: {type: Number, default: 0},
     collect_tag_count: {type: Number, default: 0},
     collect_topic_count: {type: Number, default: 0},
     create_at: {type: Date, default: Date.now},
@@ -46,22 +41,7 @@ var UserSchema = new Schema({
 
 UserSchema.plugin(BaseModel);
 UserSchema.virtual('avatar_url').get(function () {
-    var url = this.avatar || ('https://gravatar.com/avatar/' + utility.md5(this.email.toLowerCase()) + '?size=48');
-
-    // www.gravatar.com 被墙
-    url = url.replace('www.gravatar.com', 'gravatar.com');
-
-    // 让协议自适应 protocol，使用 `//` 开头
-    if (url.indexOf('http:') === 0) {
-        url = url.slice(5);
-    }
-
-    // 如果是 github 的头像，则限制大小
-    if (url.indexOf('githubusercontent') !== -1) {
-        url += '&s=120';
-    }
-
-    return url;
+    return this.avatar;
 });
 
 UserSchema.virtual('isAdvanced').get(function () {

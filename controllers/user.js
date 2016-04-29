@@ -10,8 +10,11 @@ var tools = require('../common/tools');
 var config = require('../config');
 var EventProxy = require('eventproxy');
 var validator = require('validator');
-var utility = require('utility');
 var _ = require('lodash');
+var logger = require('../common/logger');
+var Busboy = require('busboy');
+var fs = require('fs');
+var path = require('path');
 
 exports.index = function (req, res, next) {
     var user_name = req.params.name;
@@ -93,75 +96,112 @@ exports.showSetting = function (req, res, next) {
 exports.setting = function (req, res, next) {
     var ep = new EventProxy();
     ep.fail(next);
+    console.error('setting......');
 
-    // 显示出错或成功信息
-    function showMessage(msg, data, isSuccess) {
-        data = data || req.body;
-        var data2 = {
-            loginname: data.loginname,
-            email: data.email,
-            url: data.url,
-            location: data.location,
-            signature: data.signature,
-            weibo: data.weibo,
-            accessToken: data.accessToken,
-        };
-        if (isSuccess) {
-            data2.success = msg;
-        } else {
-            data2.error = msg;
-        }
-        res.render('user/setting', data2);
-    }
+    var busboy = new Busboy({headers: req.headers});
+    var params = {};
+    busboy.on('file', function (fieldname, file, filename, encoding, mimetype) {
+        var newFilename = utility.md5(filename + String((new Date()).getTime())) +
+            path.extname(filename);
 
-    // post
-    var action = req.body.action;
-    if (action === 'change_setting') {
-        var url = validator.trim(req.body.url);
-        var location = validator.trim(req.body.location);
-        var weibo = validator.trim(req.body.weibo);
-        var signature = validator.trim(req.body.signature);
+        var upload_path = config.upload.path;
+        var base_url = config.upload.url;
+        var filePath = path.join(upload_path, newFilename);
+        var fileUrl = base_url + newFilename;
 
-        User.getUserById(req.session.user._id, ep.done(function (user) {
-            user.url = url;
-            user.location = location;
-            user.signature = signature;
-            user.weibo = weibo;
-            user.save(function (err) {
-                if (err) {
-                    return next(err);
-                }
-                req.session.user = user.toObject({virtual: true});
-                return res.redirect('/setting?save=success');
-            });
-        }));
-    }
-    if (action === 'change_password') {
-        var old_pass = validator.trim(req.body.old_pass);
-        var new_pass = validator.trim(req.body.new_pass);
-        if (!old_pass || !new_pass) {
-            return res.send('旧密码或新密码不得为空');
+        file.on('end', function () {
+            params['photo_url'] = fileUrl;
+        });
+
+        file.pipe(fs.createWriteStream(filePath));
+    });
+    busboy.on('field', function (fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) {
+        params[fieldname] = val;
+    });
+    busboy.on('finish', function () {
+        // 显示出错或成功信息
+        function showMessage(msg, data, isSuccess) {
+            data = data || params;
+            var data2 = {
+                loginname: data.loginname,
+                email: data.email,
+                url: data.url,
+                location: data.location,
+                signature: data.signature,
+                weibo: data.weibo,
+                avatar: data.avatar,
+                accessToken: data.accessToken,
+            };
+            if (isSuccess) {
+                data2.success = msg;
+            } else {
+                data2.error = msg;
+            }
+            res.render('user/setting', data2);
         }
 
-        User.getUserById(req.session.user._id, ep.done(function (user) {
-            tools.bcrypt_compare(old_pass, user.pass, ep.done(function (bool) {
-                if (!bool) {
-                    return showMessage('当前密码不正确。', user);
-                }
-
-                tools.bcrypt_hash(new_pass, ep.done(function (passhash) {
-                    user.pass = passhash;
-                    user.save(function (err) {
+        // post
+        var action = params['action'];
+        console.error(action);
+        if (action === 'change_setting') {
+            console.error('change setting......');
+            var url = validator.trim(params['url']);
+            var location = validator.trim(params['location']);
+            var weibo = validator.trim(params['weibo']);
+            var signature = validator.trim(params['signature']);
+            var avatar = validator.trim(params['photo_url']);
+            User.getUserById(req.session.user._id, ep.done(function (user) {
+                if (user.avatar != config.default_avatar_path) {
+                    console.error(process.cwd());
+                    fs.unlink(process.cwd() + user.avatar, function (err) {
                         if (err) {
-                            return next(err);
+                            logger.warn(err);
                         }
-                        return showMessage('密码已被修改。', user, true);
-
                     });
+                }
+                user.url = url;
+                user.location = location;
+                user.signature = signature;
+                user.weibo = weibo;
+                user.avatar = avatar;
+                user.save(function (err) {
+                    if (err) {
+                        return next(err);
+                    }
+                    req.session.user = user.toObject({virtual: true});
+                    return res.redirect('/setting?save=success');
+                });
+            }));
+        }
+        if (action === 'change_password') {
+            var old_pass = validator.trim(params['old_pass']);
+            var new_pass = validator.trim(params['new_pass']);
+            if (!old_pass || !new_pass) {
+                return res.send('旧密码或新密码不得为空');
+            }
+
+            User.getUserById(req.session.user._id, ep.done(function (user) {
+                tools.bcrypt_compare(old_pass, user.pass, ep.done(function (bool) {
+                    if (!bool) {
+                        return showMessage('当前密码不正确。', user);
+                    }
+
+                    tools.bcrypt_hash(new_pass, ep.done(function (passhash) {
+                        user.pass = passhash;
+                        user.save(function (err) {
+                            if (err) {
+                                return next(err);
+                            }
+                            return showMessage('密码已被修改。', user, true);
+
+                        });
+                    }));
                 }));
             }));
-        }));
-    }
+        }
+
+    });
+    req.pipe(busboy);
 };
 
 exports.toggleStar = function (req, res, next) {
