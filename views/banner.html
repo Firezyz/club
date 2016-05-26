@@ -1,0 +1,34 @@
+<div class="banner">
+    <a href="/" class="logo">
+        <% if (config.site_logo) {%>
+        <img src="<%- staticFile(config.site_logo) %>" class="icon"/>
+        <%} else {%>
+        <%- config.name %>
+        <%}%>
+    </a>
+    <a href="/"><p class="index">首页</p></a>
+
+    <% if (current_user){ %>
+    <a href='/my/messages'>
+        <% if (current_user.messages_count) { %>
+        <p><%= current_user.messages_count %></p>
+        <% } %>
+        <p class="set">未读消息</p>
+    </a>
+    <% } %>
+
+    <% if (current_user) { %>
+    <a href='/setting'><p class="set">设置</p></a>
+    <a href="/user/<%= current_user.loginname %>"><p class="set"><%= current_user.loginname %></p></a>
+    <a href='/signout'><p class="exist">退出</p></a>
+    <div class="search">
+        <form action="/search" method="post">
+            <input type="text" name="q">
+            <button type="submit">搜索</button>
+        </form>
+    </div>
+    <% } else { %>
+    <a href='/signup'><p class="register">注册</p></a>
+    <a href='/signin'><p class="login">登录</p></a>
+    <% } %>
+</div>

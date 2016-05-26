@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>查询结果</title>
+    <meta charset='utf-8'>
+    <style type="text/css">
+        html {
+            -ms-touch-action: none;
+        }
+
+        * {
+            -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+        }
+
+        html, body, header, section, footer, div, h1, h2, dl, dt, dd, ul, li, p, a, b, i {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            font-size: 14px;
+        }
+
+        body {
+            font-family: \5FAE\8F6F\96C5\9ED1, "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 12px;
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        ul, li {
+            list-style: none;
+        }
+
+        a {
+            text-decoration: none;
+            color: black
+        }
+
+        img {
+            display: block;
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+        }
+
+        .banner {
+            background-color: #666699;
+            width: 100%;
+            height: 60px;
+            overflow: hidden;
+            line-height: 60px;
+            padding-left: 7%;
+        }
+
+        .banner img, p, div {
+            float: left;
+        }
+
+        .icon {
+            width: 100px;
+            border: 1px solid;
+            margin-right: 50px
+        }
+
+        .banner p {
+            padding-right: 30px;
+            font-size: 15px;
+            color: #fff
+        }
+
+        .search {
+            margin-right: 10%;
+            float: right;
+        }
+
+        .search input[type='text'] {
+            border: 1px solid #fff;
+            height: 18px;
+            border-radius: 7px 0 0 7px;
+        }
+
+        .search button {
+            width: 50px;
+            height: 22px;
+            border-radius: 0 7px 7px 0;
+            border: 1px solid #89A4FF;
+            background: #89A4FF;
+            margin-left: -4px;
+            color: #fff
+        }
+
+        .main-con {
+            width: 85%;
+            /* margin: 0 auto; */
+            margin-left: 7%;
+            overflow: hidden;
+
+        }
+
+        .left-con {
+            width: 30%;
+
+            float: left;
+            padding: 15px 10px 10px 0;
+        }
+
+        .left-one {
+            width: 100%;
+            background-color: #fff;
+
+        }
+
+        .left-one p {
+            width: 95%;
+            height: 30px;
+            line-height: 30px;
+            padding-left: 5px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            font-size: 15px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .left-one p a {
+            color: rgba(0, 0, 0, 0.6);
+            padding-left: 30px;
+        }
+
+        .userInfo {
+            width: 100%;
+            height: auto;
+            padding: 10px;
+            position: relative;
+        }
+
+        .userImage {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            display: inline;
+        }
+
+        .userName {
+            position: absolute;
+            left: 110px;
+            top: 42px;
+            font-size: 18px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .left-one .count {
+            padding-left: 10px;
+            line-height: 40px;
+            height: 40px;
+        }
+
+        .left-one .signature {
+            padding-left: 10px;
+            padding-right: 10px;
+            width: 100%;
+            height: auto;
+            line-height: 20px;
+            margin-bottom: 10px;
+            font-size: 15px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .edit-con {
+            width: 100%;
+            padding: 10px;
+            background-color: #fff;
+            margin-top: 15px;
+        }
+
+        .edit-con .edit-btn {
+            width: 120px;
+            height: 35px;
+            font-size: 16px;
+            font-weight: 700;
+            border: #89A4FF;
+            background-color: #89A4FF;
+            color: #fff;
+            letter-spacing: 6px;
+            border-radius: 5px;
+            margin-left: 75px;
+        }
+
+        .left-one .one-title {
+            width: 100%;
+            height: 30px;
+            font-size: 15px;
+            line-height: 30px;
+            padding-left: 5px;
+            background-color: rgba(102, 102, 153, 0.4);
+            color: #000;
+        }
+
+        .right-con {
+            width: 70%;
+
+            padding: 15px 0 10px 0;
+        }
+
+        .right-part {
+            width: 100%;
+            background-color: #fff;
+        }
+
+        .right-part .title {
+            background-color: #A9B2D2;
+            width: 100%;
+            height: 40px;
+            padding-left: 5px;
+            line-height: 40px;
+            font-weight: 700;
+            padding: 1px 5px;
+        }
+
+        .right-part ul {
+            width: 100%;
+            height: 50px;
+            border-bottom: 1px solid #ccc;
+            padding: 7px 5px;
+            overflow: hidden;
+            line-height: 36px;
+            position: relative;
+        }
+
+        .right-part ul li {
+            display: inline-block;
+            position: absolute;
+        }
+
+        .right-part ul:not(.title):hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .right-part .title a {
+            font-size: 16px;
+            padding-left: 10px;
+            padding-right: 10px;
+            border-radius: 5px;
+            height: 34px;
+            line-height: 34px;
+            display: inline-block;
+        }
+
+        .right-part .title a:hover {
+            color: #fff;
+            background-color: #707FB3;
+        }
+
+        .editorImage {
+            display: inline-block;
+            width: 35px;
+            height: 35px;
+            border-radius: 5px;
+        }
+
+        .replyCount {
+            left: 50px;
+        }
+
+        .clickCount {
+            left: 70px;
+        }
+
+        .tag {
+            left: 105px;
+            color: #379DFD
+        }
+
+        .theTitle {
+            left: 142px;
+
+            width: 450px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .commenterImage {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 2px;
+            position: absolute;
+            right: 90px;
+            top: 15px;
+        }
+
+        .time {
+            right: 5px;
+        }
+
+        .right-part .pagination li {
+            position: relative;
+        }
+
+        .login-btn, .register-btn {
+
+            display: inline-block;
+            width: 70px;
+            height: 30px;
+            font-size: 16px;
+            font-weight: 700;
+            background-color: #89A4FF;
+            color: #fff;
+            letter-spacing: 6px;
+            border-radius: 5px;
+            margin-left: 63px;
+            text-align: center;
+            line-height: 30px;
+
+        }
+
+        .pagination {
+            width: 100%;
+            text-align: center;
+        }
+
+        .logo {
+            float: left;
+            margin-right: 32px;
+        }
+
+    </style>
+</head>
+<body>
+
+<%- partial('banner') %>
+
+<div class="main-con">
+    <%- partial('userside') %>
+
+    <div class="right-con">
+        <div class="right-part">
+            <% if (typeof(error) !== 'undefined' && error != ''){%>
+            <ul>
+                <li><%= error %></li>
+            </ul>
+            <% } else if (typeof(topics) !== 'undefined' && topics.length > 0) { %>
+            <% topics.forEach(function(topic){ %>
+            <ul>
+                <a href="/topic/<%=topic.id%>">
+                    <li><%- topic.title %>...<%- topic.content %></li>
+                </a>
+            </ul>
+            <% }) %>
+            <% } else { %>
+            <p>无话题</p>
+            <% } %>
+
+        </div>
+    </div>
+</div>
+</body>
+</html>

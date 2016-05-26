@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FireZYZ</title>
+    <meta charset='utf-8'>
+    <style type="text/css">
+        html {
+            -ms-touch-action: none;
+        }
+
+        * {
+            -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+        }
+
+        html, body, header, section, footer, div, h1, h2, dl, dt, dd, ul, li, p, a, b, i {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            font-size: 14px;
+        }
+
+        body {
+            font-family: \5FAE\8F6F\96C5\9ED1, "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 12px;
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        ul, li {
+            list-style: none;
+        }
+
+        a {
+            text-decoration: none;
+            color: black
+        }
+
+        img {
+            display: block;
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+        }
+
+        .banner {
+            background-color: #666699;
+            width: 100%;
+            height: 60px;
+            overflow: hidden;
+            line-height: 60px;
+            padding-left: 7%;
+        }
+
+        .banner img, p, div {
+            float: left;
+        }
+
+        .icon {
+            width: 100px;
+            border: 1px solid;
+            margin-right: 50px
+        }
+
+        .banner p {
+            padding-right: 30px;
+            font-size: 15px;
+            color: #fff
+        }
+
+        .search {
+            margin-left: 200px;
+        }
+
+        .search input[type='text'] {
+            border: 1px solid #fff;
+            height: 18px;
+            border-radius: 7px 0 0 7px;
+        }
+
+        .search button {
+            width: 50px;
+            height: 22px;
+            border-radius: 0 7px 7px 0;
+            border: 1px solid #89A4FF;
+            background: #89A4FF;
+            margin-left: -4px;
+            color: #fff
+        }
+
+        .main-con {
+            width: 85%;
+            /* margin: 0 auto; */
+            margin-left: 7%;
+            overflow: hidden;
+
+        }
+
+        .left-con {
+            width: 30%;
+
+            float: left;
+            padding: 15px 10px 10px 0;
+        }
+
+        .left-one {
+            width: 100%;
+            background-color: #fff;
+
+        }
+
+        .left-one p {
+            width: 95%;
+            height: 30px;
+            line-height: 30px;
+            padding-left: 5px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            font-size: 15px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .left-one p a {
+            color: rgba(0, 0, 0, 0.6);
+            padding-left: 30px;
+        }
+
+        .userInfo {
+            width: 100%;
+            height: auto;
+            padding: 10px;
+            position: relative;
+        }
+
+        .userImage {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            display: inline;
+        }
+
+        .userName {
+            position: absolute;
+            left: 110px;
+            top: 42px;
+            font-size: 18px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .left-one .count {
+            padding-left: 10px;
+            line-height: 40px;
+            height: 40px;
+        }
+
+        .left-one .signature {
+            padding-left: 10px;
+            padding-right: 10px;
+            width: 100%;
+            height: auto;
+            line-height: 20px;
+            margin-bottom: 10px;
+            font-size: 15px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .edit-con {
+            width: 100%;
+            padding: 10px;
+            background-color: #fff;
+            margin-top: 15px;
+        }
+
+        .edit-con .edit-btn {
+            width: 120px;
+            height: 35px;
+            font-size: 16px;
+            font-weight: 700;
+            border: #89A4FF;
+            background-color: #89A4FF;
+            color: #fff;
+            letter-spacing: 6px;
+            border-radius: 5px;
+            margin-left: 75px;
+        }
+
+        .left-one .one-title {
+            width: 100%;
+            height: 30px;
+            font-size: 15px;
+            line-height: 30px;
+            padding-left: 5px;
+            background-color: rgba(102, 102, 153, 0.4);
+            color: #000;
+        }
+
+        .right-con {
+            width: 70%;
+
+            padding: 15px 0 10px 0;
+        }
+
+        .right-part {
+            width: 100%;
+            background-color: #fff;
+            padding-bottom: 30px;
+        }
+
+        .right-part .title {
+            background-color: rgba(102, 102, 153, 0.4);
+            width: 100%;
+            height: 30px;
+            padding-left: 5px;
+            line-height: 30px;
+            font-weight: 700;
+            padding: 1px 5px;
+            margin-bottom: 30px;
+        }
+
+        .right-part li {
+            width: 100%;
+            height: 50px;
+            padding: 7px 5px;
+            line-height: 36px;
+            position: relative;
+        }
+
+        .right-part li span {
+            width: 150px;
+            display: inline-block;
+            text-align: right;
+            font-size: 15px;
+            color: rgba(0, 0, 0, 0.7);
+        }
+
+        .right-part li .error {
+            color: #FF5353;
+            display: none;
+        }
+
+        .right-part li input {
+            width: 250px;
+            height: 22px;
+            margin-left: 20px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .right-part li textarea {
+            display: inline-block;
+            width: 250px;
+            margin-left: 171px;
+            font-size: 16px;
+        }
+
+        .right-part li input[type='submit'] {
+            margin-left: 170px;
+            width: 100px;
+            height: 30px;
+            border: 1px solid;
+            font-size: 16px;
+            font-weight: 700;
+            border: #89A4FF;
+            background-color: #89A4FF;
+            color: #fff;
+            letter-spacing: 3px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<%- partial('banner') %>
+
+<div class="main-con">
+
+    <%- partial('userside') %>
+
+    <div class="right-con">
+        <div class="right-part">
+            <li class="title">
+                设置
+            </li>
+            <form id='setting_form' class='form-horizontal' action='/setting' method='post'
+                  enctype="multipart/form-data">
+                <li>
+                    <span>用户名</span><input type="text" name="name" id="name" readonly="readonly"
+                                           value="<%= loginname %>">
+
+                </li>
+                <li>
+                    <span>电子邮箱</span><input type="text" name="email" id="email" readonly="readonly"
+                                            value="<%= email %>">
+
+                </li>
+                <li>
+                    <span>头像</span><input class='input-xlarge' id='photo' name='photo' type='file'/>
+                </li>
+                <li>
+                    <span>个人网站</span><input id='url' name='url' size='30' type='text'
+                                            value="<%= typeof(url) !== 'undefined' ? url : '' %>">
+                </li>
+                <li>
+                    <span>所在地区</span><input id='location' name='location' size='30' type='text'
+                                            value="<%= typeof(location) !== 'undefined' ? location : '' %>">
+                </li>
+                <li>
+                    <span>微博</span><input id='weibo' name='weibo' size='30' type='text'
+                                          value="<%= typeof(weibo) !== 'undefined' ? weibo : '' %>">
+                </li>
+                <li>
+                    <span style='position:absolute'>个性签名</span>
+                    <textarea class='input-xlarge' id='signature' name='signature' size='30'><%= typeof(signature) !== 'undefined' ? signature : "" %></textarea>
+                </li>
+                <li>
+                    <input type='hidden' id='action' name='action' value='change_setting'/>
+                    <input type='hidden' name='_csrf' value='<%= csrf %>'/>
+                    <input type="submit" class="saveInfo" value="保存设置">
+                    <span style='color:#418DFF'>保存成功！</span>
+                </li>
+            </form>
+        </div>
+
+        <div class="right-part" style="margin-top:15px">
+            <form id='change_pass_form' class='form-horizontal' action='/setting' method='post'
+                  enctype="multipart/form-data">
+                <li class="title">
+                    更改密码
+                </li>
+                <li>
+                    <span>当前密码</span><input type='password' id='old_pass' name='old_pass' size='30'/>
+                    <span id='pwdError' class="error">密码错误！</span>
+                </li>
+                <li>
+                    <span>新密码</span><input type='password' id='new_pass' name='new_pass' size='30'/>
+
+                </li>
+                <li>
+                    <input type='hidden' id='action' name='action' value='change_password'/>
+                    <input type='hidden' name='_csrf' value='<%= csrf %>'/>
+                    <input type="submit" class="savePwd" value="更改密码">
+                    <span id='saveSuccess' style='color:#418DFF;display:none'>保存成功！</span>
+                </li>
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript"
+        src="http://s.momocdn.com/w/js/2015/12/10/1449717535115-JPb9d99c9c342acbbb746afca6fd149715.js"></script>
+<script type="text/javascript">
+    $('.savePwd').click(function () {
+        var oldpwd = $('#oldpwd').val();
+        var newpwd = $('#newpwd').val();
+        $.ajax({
+            type: post,
+            url: '',
+            data: {
+                'oldpwd': oldpwd,
+                'newpwd': newpwd
+            },
+            success: function () {
+                if ('原密码错误') {
+                    $('#pwdError').show();
+                } else if ('保存成功') {
+                    $('#saveSuccess').show();
+                }
+            },
+            error: function () {
+
+            }
+
+        })
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>话题详情</title>
+    <meta charset='utf-8'>
+    <style type="text/css">
+        html {
+            -ms-touch-action: none;
+        }
+
+        * {
+            -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+        }
+
+        html, body, header, section, footer, div, h1, h2, dl, dt, dd, ul, li, p, a, b, i {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            font-size: 14px;
+        }
+
+        body {
+            font-family: \5FAE\8F6F\96C5\9ED1, "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 12px;
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        ul, li {
+            list-style: none;
+        }
+
+        a {
+            text-decoration: none;
+            color: black
+        }
+
+        img {
+            display: block;
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+        }
+
+        .banner {
+            background-color: #666699;
+            width: 100%;
+            height: 60px;
+            overflow: hidden;
+            line-height: 60px;
+            padding-left: 7%;
+        }
+
+        .banner img, p, div {
+            float: left;
+        }
+
+        .icon {
+            width: 100px;
+            border: 1px solid;
+            margin-right: 50px
+        }
+
+        .banner p {
+            padding-right: 30px;
+            font-size: 15px;
+            color: #fff
+        }
+
+        .search {
+            margin-left: 200px;
+        }
+
+        .search input[type='text'] {
+            border: 1px solid #fff;
+            height: 18px;
+            border-radius: 7px 0 0 7px;
+        }
+
+        .search button {
+            width: 50px;
+            height: 22px;
+            border-radius: 0 7px 7px 0;
+            border: 1px solid #89A4FF;
+            background: #89A4FF;
+            margin-left: -4px;
+            color: #fff
+        }
+
+        .main-con {
+            width: 85%;
+            /* margin: 0 auto; */
+            margin-left: 7%;
+            overflow: hidden;
+
+        }
+
+        .left-con {
+            width: 30%;
+
+            float: left;
+            padding: 15px 10px 10px 0;
+        }
+
+        .left-one {
+            width: 100%;
+            background-color: #fff;
+
+        }
+
+        .left-one p {
+            width: 95%;
+            height: 30px;
+            line-height: 30px;
+            padding-left: 5px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            font-size: 15px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .left-one p a {
+            color: rgba(0, 0, 0, 0.6);
+            padding-left: 30px;
+        }
+
+        .userInfo {
+            width: 100%;
+            height: auto;
+            padding: 10px;
+            position: relative;
+        }
+
+        .userImage {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            display: inline;
+        }
+
+        .userName {
+            position: absolute;
+            left: 110px;
+            top: 42px;
+            font-size: 18px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .left-one .count {
+            padding-left: 10px;
+            line-height: 40px;
+            height: 40px;
+        }
+
+        .left-one .signature {
+            padding-left: 10px;
+            padding-right: 10px;
+            width: 100%;
+            height: auto;
+            line-height: 20px;
+            margin-bottom: 10px;
+            font-size: 15px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .left-one .one-title {
+            width: 100%;
+            height: 30px;
+            font-size: 15px;
+            line-height: 30px;
+            padding-left: 5px;
+            background-color: rgba(102, 102, 153, 0.4);
+            color: #000;
+        }
+
+        .right-con {
+            width: 70%;
+
+            padding: 15px 0 10px 0;
+        }
+
+        .right-part {
+            width: 100%;
+            background-color: #fff;
+            margin-bottom: 15px;
+        }
+
+        .right-part .title-part {
+            width: 100%;
+            height: 100px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+            padding: 25px 15px;
+
+        }
+
+        .right-part .title-part li:first-child {
+            width: 100%;
+            font-size: 18px;
+            font-weight: 700;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .right-part .title-part li:first-child span {
+            font-size: 16px;
+            font-weight: 300;
+            color: #379DFD;
+        }
+
+        .right-part .title-part li:last-child {
+            line-height: 50px;
+            font-size: 12px;
+            color: rgba;
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+        .right-part .text-part {
+            width: 100%;
+            padding: 15px;
+            height: 100px;
+            border: 1px solid;
+        }
+
+        .right-part .title {
+            width: 100%;
+            height: 35px;
+            line-height: 35px;
+            background: rgba(102, 102, 153, 0.4);
+            color: #000;
+            font-size: 15px;
+            padding-left: 15px;
+        }
+
+        .right-part .discuss-list {
+            margin-top: 35px;
+            padding-bottom: 15px
+        }
+
+        .right-part .discuss-list li {
+            padding: 10px 15px;
+            overflow: hidden;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.2)
+
+        }
+
+        .right-part .discuss-list .head {
+            width: 40px;
+            height: 40px;
+            display: inline-block;
+            border-radius: 5px;
+        }
+
+        .right-part .discuss-list .name {
+            position: absolute;
+            font-size: 15px;
+            font-weight: 600;
+            left: 46px;
+            top: 3px;
+        }
+
+        .right-part .discuss-list .time {
+            font-size: 12px;
+            font-weight: 200;
+        }
+
+        .right-part .discuss-list div {
+            float: none;
+            position: relative;
+        }
+
+        .right-part .discuss-list p {
+            margin-left: 60px;
+            margin-top: 10px;
+            font-size: 15px;
+            float: none;
+        }
+
+        .right-part .discuss-list .likeAndReply-con {
+            float: right;
+        }
+
+        .right-part .discuss-list .like-icon {
+            width: 18px;
+            height: 18px;
+            display: inline;
+        }
+
+        .right-part .discuss-list .like-count {
+
+        }
+
+        .right-part .discuss-list .reply-icon {
+            width: 20px;
+            height: 20px;
+            display: inline;
+        }
+
+        .right-part .discuss-list .reply {
+            width: 95%;
+            height: 100px;
+            font-size: 16px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .right-part .discuss-list .submit-btn {
+            width: 70px;
+            display: block;
+            height: 30px;
+            font-size: 16px;
+            background: #379DFD;
+            color: #fff;
+            border: 1px solid #fff;
+            border-radius: 4px;
+        }
+
+    </style>
+</head>
+<body>
+<%- partial('banner') %>
+
+<div class="main-con">
+    <%- partial('userside') %>
+    <div class="right-con">
+        <div class="right-part">
+            <div class="title-part">
+                <li>
+                    <% if (topic.top) { %>
+                    <span>[置顶]</span>
+                    <% } else if (topic.good) { %>
+                    <span>[精华]</span>
+                    <% } else if (typeof(tab) !== 'undefined' && tab === 'all' && topic.tabName) { %>
+                    <span>[<%= topic.tabName %>]</span>
+                    <% } %>
+                    <%= topic.title %>
+                </li>
+                <li>
+                    *发布于<%= topic.create_at_ago() %> *作者 <a href="/user/<%= topic.author.loginname %>"><%=
+                    topic.author.loginname %></a> *<%= topic.visit_count %>次浏览
+                </li>
+                <% if (topic.create_at_ago() != topic.update_at_ago()) { %>
+                <li>
+                    最后一次编辑是 <%= topic.update_at_ago() %>
+                </li>
+                <% } %>
+                <% if (topic.tab) { %>
+                <li> 来自 <%= topic.tabName %></li>
+                <%}%>
+
+                <% if (current_user) { %>
+                <input class="span-common <%= is_collect ? '' : 'span-success' %> pull-right collect_btn" type="submit"
+                       value="<%= is_collect ? '取消收藏' : '收藏' %>" action="<%= is_collect ? 'de_collect' : 'collect' %>">
+                <%}%>
+
+            </div>
+
+            <% if (current_user) { %>
+            <div id="manage_topic">
+                <% if (current_user.is_admin) { %>
+                <a href='/topic/<%= topic._id %>/top' data-method="post">
+                    <% if (topic.top) { %>
+                    <i class="fa fa-lg fa-star-o" title='取消置顶'></i>
+                    <% } else { %>
+                    <i class="fa fa-lg fa-star" title='置顶'/></i>
+                    <% } %>
+                </a>
+
+
+                <a href='/topic/<%= topic._id %>/good' data-method="post">
+                    <% if (topic.good) { %>
+                    <i class="fa fa-lg fa-heart-o" title="取消精华"></i>
+                    <% } else { %>
+                    <i class="fa fa-lg fa-heart" title="加精华"></i>
+                    <% } %>
+                </a>
+
+                <a href='/topic/<%= topic._id %>/lock' data-method="post">
+                    <% if (topic.lock) { %>
+                    <i class="fa fa-lg fa-unlock" title='取消锁定'></i>
+                    <% } else { %>
+                    <i class="fa fa-lg fa-lock" title='锁定（不可再回复）'/></i>
+                    <% } %>
+                </a>
+
+
+                <a href='/topic/<%= topic._id %>/edit'>
+                    <i class="fa fa-lg fa-pencil-square-o" title='编辑'></i></a>
+                <a href='javascript:;'
+                   data-id="<%= topic._id %>"
+                   class='delete_topic_btn'>
+                    <i class="fa fa-lg fa-trash" title='删除'></i></a>
+                <% } else { %>
+                <% if (current_user._id.equals(topic.author_id)) { %>
+                <a href='/topic/<%= topic._id %>/edit'>
+                    <i class="fa fa-lg fa-pencil-square-o" title='编辑'></i></a>
+                <a href='javascript:;'
+                   data-id="<%= topic._id %>"
+                   class='delete_topic_btn'>
+                    <i class="fa fa-lg fa-trash" title='删除'></i></a>
+                <% } %>
+                <% } %>
+            </div>
+            <% } %>
+
+            <div class="text-part">
+                <%- markdown(topic.linkedContent) %>
+            </div>
+        </div>
+        <div class="right-part">
+
+
+            <% if (topic.replies && topic.replies.length > 0) { %>
+            <p class="title"><%= topic.replies.length %> 回复</p>
+            <ul class="discuss-list">
+                <% topic.replies.forEach(function(reply,i){ %>
+                <li>
+                    <div>
+                        <a href="/user/<%= reply.author.loginname %>"><img class="head"
+                                                                           src="<%= reply.author.avatar %>"></a>
+                        <span class='name'><%= reply.author.loginname %></span>
+                        <span class='time'><%= i + 1 %>楼*<%= reply.create_at_ago() %></span>
+                        <div class="likeAndReply-con">
+                            <img class="like-icon"
+                                 src="http://7xt2qz.com1.z0.glb.clouddn.com/like_512px_1101033_easyicon.net.png">
+                            <span class='like-count'><%= reply.ups && reply.ups.length ? reply.ups.length : '' %></span>
+                            <img class="reply-icon"
+                                 src="http://7xt2qz.com1.z0.glb.clouddn.com/reply_314px_1187722_easyicon.net.png">
+                        </div>
+
+                        <% if (current_user && current_user.is_admin ||
+                        (current_user && current_user._id.toString() == reply.author._id.toString())
+                        ) { %>
+                        <a href='/reply/<%= reply._id %>/edit' class='edit_reply_btn'>
+                            <i class="fa fa-pencil-square-o" title='编辑'></i>
+                        </a>
+                        <a href='javascript:void(0);' class='delete_reply_btn'>
+                            <i class="fa fa-trash" title='删除'></i>
+                        </a>
+                        <% } %>
+                        <span>
+                            <% if (current_user){ %>
+                            <i class="fa fa-reply reply2_btn" title="回复"></i>
+                            <% } %>
+                        </span>
+                    </div>
+                    <p><%- markdown(reply.content) %></p>
+                    <div style="display:block">
+                        <form>
+                            <textarea class="reply"></textarea>
+                            <input class="submit-btn" type="submit" value="回复">
+                        </form>
+                    </div>
+                </li>
+                <%}) %>
+
+            </ul>
+            <% } %>
+        </div>
+    </div>
+</div>
+<script type="text/javascript"
+        src="http://s.momocdn.com/w/js/2015/12/10/1449717535115-JPb9d99c9c342acbbb746afca6fd149715.js"></script>
+<script type="text/javascript">
+    $('.like-icon').click(function () {
+        if ($(this).attr('src') == 'http://7xt2qz.com1.z0.glb.clouddn.com/like_512px_1101033_easyicon.net.png') {
+            $(this).attr('src', 'http://7xt2qz.com1.z0.glb.clouddn.com/like-black.png')
+            $.ajax({})
+        } else {
+            $(this).attr('src', 'http://7xt2qz.com1.z0.glb.clouddn.com/like_512px_1101033_easyicon.net.png')
+        }
+
+
+    })
+</script>
+</body>
+</html>
