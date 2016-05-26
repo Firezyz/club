@@ -45,16 +45,6 @@ var getEsBody = function () {
     };
 }
 
-/**
- * 根据主题ID获取主题
- * Callback:
- * - err, 数据库错误
- * - topic, 主题
- * - author, 作者
- * - lastReply, 最后回复
- * @param {String} id 主题ID
- * @param {Function} callback 回调函数
- */
 exports.getTopicById = function (id, callback) {
     var proxy = new EventProxy();
     var events = ['topic', 'author', 'last_reply'];
@@ -86,27 +76,10 @@ exports.getTopicById = function (id, callback) {
     }));
 };
 
-/**
- * 获取关键词能搜索到的主题数量
- * Callback:
- * - err, 数据库错误
- * - count, 主题数量
- * @param {String} query 搜索关键词
- * @param {Function} callback 回调函数
- */
 exports.getCountByQuery = function (query, callback) {
     Topic.count(query, callback);
 };
 
-/**
- * 根据关键词，获取主题列表
- * Callback:
- * - err, 数据库错误
- * - count, 主题列表
- * @param {String} query 搜索关键词
- * @param {Object} opt 搜索选项
- * @param {Function} callback 回调函数
- */
 exports.getTopicsByQuery = function (query, opt, callback) {
     query.deleted = false;
     Topic.find(query, {}, opt, function (err, topics) {
@@ -150,17 +123,6 @@ exports.getLimit5w = function (callback) {
     Topic.find({deleted: false}, '_id', {limit: 50000, sort: '-create_at'}, callback);
 };
 
-/**
- * 获取所有信息的主题
- * Callback:
- * - err, 数据库异常
- * - message, 消息
- * - topic, 主题
- * - author, 主题作者
- * - replies, 主题的回复
- * @param {String} id 主题ID
- * @param {Function} callback 回调函数
- */
 exports.getFullTopic = function (id, callback) {
     var proxy = new EventProxy();
     var events = ['topic', 'author', 'replies'];
@@ -192,12 +154,6 @@ exports.getFullTopic = function (id, callback) {
     }));
 };
 
-/**
- * 更新主题的最后回复信息
- * @param {String} topicId 主题ID
- * @param {String} replyId 回复ID
- * @param {Function} callback 回调函数
- */
 exports.updateLastReply = function (topicId, replyId, callback) {
     Topic.findOne({_id: topicId}, function (err, topic) {
         if (err || !topic) {
@@ -210,20 +166,10 @@ exports.updateLastReply = function (topicId, replyId, callback) {
     });
 };
 
-/**
- * 根据主题ID，查找一条主题
- * @param {String} id 主题ID
- * @param {Function} callback 回调函数
- */
 exports.getTopic = function (id, callback) {
     Topic.findOne({_id: id}, callback);
 };
 
-/**
- * 将当前主题的回复计数减1，并且更新最后回复的用户，删除回复时用到
- * @param {String} id 主题ID
- * @param {Function} callback 回调函数
- */
 exports.reduceCount = function (id, callback) {
     Topic.findOne({_id: id}, function (err, topic) {
         if (err) {

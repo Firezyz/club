@@ -1,24 +1,8 @@
-/*!
- * nodeclub - topic mention user controller.
- * Copyright(c) 2012 fengmk2 <fengmk2@gmail.com>
- * Copyright(c) 2012 muyuan
- * MIT Licensed
- */
-
-/**
- * Module dependencies.
- */
-
 var User = require('../proxy').User;
 var Message = require('./message');
 var EventProxy = require('eventproxy');
 var _ = require('lodash');
 
-/**
- * 从文本中提取出@username 标记的用户名数组
- * @param {String} text 文本内容
- * @return {Array} 用户名数组
- */
 var fetchUsers = function (text) {
     if (!text) {
         return [];
@@ -52,16 +36,6 @@ var fetchUsers = function (text) {
 };
 exports.fetchUsers = fetchUsers;
 
-/**
- * 根据文本内容中读取用户，并发送消息给提到的用户
- * Callback:
- * - err, 数据库异常
- * @param {String} text 文本内容
- * @param {String} topicId 主题ID
- * @param {String} authorId 作者ID
- * @param {String} reply_id 回复ID
- * @param {Function} callback 回调函数
- */
 exports.sendMessageToMentionUsers = function (text, topicId, authorId, reply_id, callback) {
     if (typeof reply_id === 'function') {
         callback = reply_id;
@@ -90,14 +64,6 @@ exports.sendMessageToMentionUsers = function (text, topicId, authorId, reply_id,
     });
 };
 
-/**
- * 根据文本内容，替换为数据库中的数据
- * Callback:
- * - err, 数据库异常
- * - text, 替换后的文本内容
- * @param {String} text 文本内容
- * @param {Function} callback 回调函数
- */
 exports.linkUsers = function (text, callback) {
     var users = fetchUsers(text);
     for (var i = 0, l = users.length; i < l; i++) {

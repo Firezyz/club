@@ -1,4 +1,3 @@
-// ErrorPage middleware
 exports.errorPage = function (req, res, next) {
 
     res.render404 = function (error) {

@@ -89,7 +89,7 @@ exports.showSetting = function (req, res, next) {
             user.success = '保存成功。';
         }
         user.error = null;
-        return res.render('user/setting', user);
+        return res.render('setting', user);
     });
 };
 
@@ -100,20 +100,30 @@ exports.setting = function (req, res, next) {
 
     var busboy = new Busboy({headers: req.headers});
     var params = {};
+    var re = new RegExp(".+\.jpg");
     busboy.on('file', function (fieldname, file, filename, encoding, mimetype) {
-        var newFilename = utility.md5(filename + String((new Date()).getTime())) +
-            path.extname(filename);
+        if (re.test(filename)) {
+            var newFilename = utility.md5(filename + String((new Date()).getTime())) +
+                path.extname(filename);
 
-        var upload_path = config.upload.path;
-        var base_url = config.upload.url;
-        var filePath = path.join(upload_path, newFilename);
-        var fileUrl = base_url + newFilename;
+            var upload_path = config.upload.path;
+            var base_url = config.upload.url;
+            var filePath = path.join(upload_path, newFilename);
+            var fileUrl = base_url + newFilename;
 
-        file.on('end', function () {
-            params['photo_url'] = fileUrl;
-        });
+            file.on('end', function () {
+                params['photo_url'] = fileUrl;
+            });
 
-        file.pipe(fs.createWriteStream(filePath));
+            file.pipe(fs.createWriteStream(filePath));
+        } else {
+            file.on('end', function () {
+                params['photo_url'] = '';
+            });
+            var upload_path = config.upload.path;
+            var filePath = path.join(upload_path, 'tmp.jpg');
+            file.pipe(fs.createWriteStream(filePath));
+        }
     });
     busboy.on('field', function (fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) {
         params[fieldname] = val;
@@ -150,8 +160,10 @@ exports.setting = function (req, res, next) {
             var weibo = validator.trim(params['weibo']);
             var signature = validator.trim(params['signature']);
             var avatar = validator.trim(params['photo_url']);
+
+            console.error('zyz2' + avatar);
             User.getUserById(req.session.user._id, ep.done(function (user) {
-                if (user.avatar != config.default_avatar_path) {
+                if (user.avatar != config.default_avatar_path && avatar != '') {
                     console.error(process.cwd());
                     fs.unlink(process.cwd() + user.avatar, function (err) {
                         if (err) {
@@ -159,11 +171,21 @@ exports.setting = function (req, res, next) {
                         }
                     });
                 }
-                user.url = url;
-                user.location = location;
-                user.signature = signature;
-                user.weibo = weibo;
-                user.avatar = avatar;
+                if (url != '') {
+                    user.url = url;
+                }
+                if (location != '') {
+                    user.location = location;
+                }
+                if (signature != '') {
+                    user.signature = signature;
+                }
+                if (weibo != '') {
+                    user.weibo = weibo;
+                }
+                if (avatar != '') {
+                    user.avatar = avatar;
+                }
                 user.save(function (err) {
                     if (err) {
                         return next(err);

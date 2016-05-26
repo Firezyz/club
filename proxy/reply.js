@@ -5,23 +5,12 @@ var tools = require('../common/tools');
 var User = require('./user');
 var at = require('../common/at');
 
-/**
- * 获取一条回复信息
- * @param {String} id 回复ID
- * @param {Function} callback 回调函数
- */
+
 exports.getReply = function (id, callback) {
     Reply.findOne({_id: id}, callback);
 };
 
-/**
- * 根据回复ID，获取回复
- * Callback:
- * - err, 数据库异常
- * - reply, 回复内容
- * @param {String} id 回复ID
- * @param {Function} callback 回调函数
- */
+
 exports.getReplyById = function (id, callback) {
     if (!id) {
         return callback(null, null);
@@ -55,14 +44,7 @@ exports.getReplyById = function (id, callback) {
     });
 };
 
-/**
- * 根据主题ID，获取回复列表
- * Callback:
- * - err, 数据库异常
- * - replies, 回复列表
- * @param {String} id 主题ID
- * @param {Function} callback 回调函数
- */
+
 exports.getRepliesByTopicId = function (id, cb) {
     Reply.find({topic_id: id, deleted: false}, '', {sort: 'create_at'}, function (err, replies) {
         if (err) {
@@ -100,14 +82,7 @@ exports.getRepliesByTopicId = function (id, cb) {
     });
 };
 
-/**
- * 创建并保存一条回复信息
- * @param {String} content 回复内容
- * @param {String} topicId 主题ID
- * @param {String} authorId 回复作者
- * @param {String} [replyId] 回复ID，当二级回复时设定该值
- * @param {Function} callback 回调函数
- */
+
 exports.newAndSave = function (content, topicId, authorId, replyId, callback) {
     if (typeof replyId === 'function') {
         callback = replyId;
@@ -126,11 +101,7 @@ exports.newAndSave = function (content, topicId, authorId, replyId, callback) {
     });
 };
 
-/**
- * 根据topicId查询到最新的一条未删除回复
- * @param topicId 主题ID
- * @param callback 回调函数
- */
+
 exports.getLastReplyByTopId = function (topicId, callback) {
     Reply.find({topic_id: topicId, deleted: false}, '_id', {sort: {create_at: -1}, limit: 1}, callback);
 };

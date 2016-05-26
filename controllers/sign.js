@@ -8,7 +8,6 @@ var utility = require('utility');
 var authMiddleWare = require('../middlewares/auth');
 var uuid = require('node-uuid');
 
-//sign up
 exports.showSignup = function (req, res) {
     res.render('sign/signup');
 };
@@ -26,7 +25,6 @@ exports.signup = function (req, res, next) {
         res.render('sign/signup', {error: msg, loginname: loginname, email: email});
     });
 
-    // 验证信息的正确性
     if ([loginname, pass, rePass, email].some(function (item) {
             return item === '';
         })) {
@@ -46,7 +44,6 @@ exports.signup = function (req, res, next) {
     if (pass !== rePass) {
         return ep.emit('prop_err', '两次密码输入不一致。');
     }
-    // END 验证信息的正确性
 
 
     User.getUsersByQuery({
@@ -80,21 +77,11 @@ exports.signup = function (req, res, next) {
     });
 };
 
-/**
- * Show user login page.
- *
- * @param  {HttpRequest} req
- * @param  {HttpResponse} res
- */
 exports.showLogin = function (req, res) {
     req.session._loginReferer = req.headers.referer;
     res.render('sign/signin');
 };
 
-/**
- * define some page when login just jump to the home page
- * @type {Array}
- */
 var notJump = [
     '/active_account', //active page
     '/reset_pass',     //reset password page, avoid to reset twice
@@ -102,13 +89,6 @@ var notJump = [
     '/search_pass'    //serch pass page
 ];
 
-/**
- * Handle user login.
- *
- * @param {HttpRequest} req
- * @param {HttpResponse} res
- * @param {Function} next
- */
 exports.login = function (req, res, next) {
     var loginname = validator.trim(req.body.name).toLowerCase();
     var pass = validator.trim(req.body.pass);
@@ -173,6 +153,7 @@ exports.login = function (req, res, next) {
 
 // sign out
 exports.signout = function (req, res, next) {
+    console.log('signout');
     req.session.destroy();
     res.clearCookie(config.auth_cookie_name, {path: '/'});
     res.redirect('/');
@@ -238,14 +219,6 @@ exports.updateSearchPass = function (req, res, next) {
     });
 };
 
-/**
- * reset password
- * 'get' to show the page, 'post' to reset password
- * after reset password, retrieve_key&time will be destroy
- * @param  {http.req}   req
- * @param  {http.res}   res
- * @param  {Function} next
- */
 exports.resetPass = function (req, res, next) {
     var key = validator.trim(req.query.key);
     var name = validator.trim(req.query.name);

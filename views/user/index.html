@@ -1,179 +1,374 @@
-<%- partial('../sidebar') %>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FireZYZ</title>
+    <meta charset='utf-8'>
+    <style type="text/css">
+        html {
+            -ms-touch-action: none;
+        }
 
-<div id='content'>
-  <div class='panel'>
-    <div class='header'>
-      <ul class='breadcrumb'>
-        <li><a href='/'>主页</a><span class='divider'>/</span></li>
-      </ul>
-    </div>
-    <div class='inner userinfo'>
-      <div class='user_big_avatar'>
-        <img src="<%= proxy(user.avatar_url) %>" class="user_avatar" title="<%= user.loginname %>"/>
-      </div>
-      <a class='dark'><%= user.loginname %></a>
+        * {
+            -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+        }
 
-      <div class='user_profile'>
-        <ul class='unstyled'>
-          <span class='big'><%= user.score %></span> 积分
-          <% if (user.collect_topic_count) {%>
-          <li>
+        html, body, header, section, footer, div, h1, h2, dl, dt, dd, ul, li, p, a, b, i {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            font-size: 14px;
+        }
+
+        body {
+            font-family: \5FAE\8F6F\96C5\9ED1, "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 12px;
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        ul, li {
+            list-style: none;
+        }
+
+        a {
+            text-decoration: none;
+            color: black
+        }
+
+        img {
+            display: block;
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+        }
+
+        .banner {
+            background-color: #666699;
+            width: 100%;
+            height: 60px;
+            overflow: hidden;
+            line-height: 60px;
+            padding-left: 7%;
+        }
+
+        .banner img, p, div {
+            float: left;
+        }
+
+        .icon {
+            width: 100px;
+            border: 1px solid;
+            margin-right: 50px
+        }
+
+        .banner p {
+            padding-right: 30px;
+            font-size: 15px;
+            color: #fff
+        }
+
+        .search {
+            margin-left: 200px;
+        }
+
+        .search input[type='text'] {
+            border: 1px solid #fff;
+            height: 18px;
+            border-radius: 7px 0 0 7px;
+        }
+
+        .search button {
+            width: 50px;
+            height: 22px;
+            border-radius: 0 7px 7px 0;
+            border: 1px solid #89A4FF;
+            background: #89A4FF;
+            margin-left: -4px;
+            color: #fff
+        }
+
+        .main-con {
+            width: 85%;
+            /* margin: 0 auto; */
+            margin-left: 7%;
+            overflow: hidden;
+
+        }
+
+        .left-con {
+            width: 30%;
+
+            float: left;
+            padding: 15px 10px 10px 0;
+        }
+
+        .left-one {
+            width: 100%;
+            background-color: #fff;
+
+        }
+
+        .left-one p {
+            width: 95%;
+            height: 30px;
+            line-height: 30px;
+            padding-left: 5px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            font-size: 15px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .left-one p a {
+            color: rgba(0, 0, 0, 0.6);
+            padding-left: 30px;
+        }
+
+        .userInfo {
+            width: 100%;
+            height: auto;
+            padding: 10px;
+            position: relative;
+        }
+
+        .userImage {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            display: inline;
+        }
+
+        .userName {
+            position: absolute;
+            left: 110px;
+            top: 42px;
+            font-size: 18px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .left-one .count {
+            padding-left: 10px;
+            line-height: 40px;
+            height: 40px;
+        }
+
+        .left-one .signature {
+            padding-left: 10px;
+            padding-right: 10px;
+            width: 100%;
+            height: auto;
+            line-height: 20px;
+            margin-bottom: 10px;
+            font-size: 15px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .edit-con {
+            width: 100%;
+            padding: 10px;
+            background-color: #fff;
+            margin-top: 15px;
+        }
+
+        .edit-con .edit-btn {
+            width: 120px;
+            height: 35px;
+            font-size: 16px;
+            font-weight: 700;
+            border: #89A4FF;
+            background-color: #89A4FF;
+            color: #fff;
+            letter-spacing: 6px;
+            border-radius: 5px;
+            margin-left: 75px;
+        }
+
+        .left-one .one-title {
+            width: 100%;
+            height: 30px;
+            font-size: 15px;
+            line-height: 30px;
+            padding-left: 5px;
+            background-color: rgba(102, 102, 153, 0.4);
+            color: #000;
+        }
+
+        .right-con {
+            width: 70%;
+
+            padding: 15px 0 10px 0;
+        }
+
+        .right-part {
+            width: 100%;
+            background-color: #fff;
+        }
+
+        .right-part .title {
+            background-color: rgba(102, 102, 153, 0.4);
+            width: 100%;
+            height: 30px;
+            padding-left: 5px;
+            line-height: 30px;
+            font-weight: 700;
+            padding: 1px 5px;
+        }
+
+        .right-part ul {
+            width: 100%;
+            height: 50px;
+            padding: 7px 5px;
+            overflow: hidden;
+            line-height: 36px;
+            position: relative;
+        }
+
+        .right-part ul li {
+            display: inline-block;
+            position: absolute;
+        }
+
+        .right-part ul:not(.title):hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .right-part .title a {
+            font-size: 16px;
+            padding-left: 10px;
+            padding-right: 10px;
+            border-radius: 5px;
+            height: 34px;
+            line-height: 34px;
+            display: inline-block;
+        }
+
+        .right-part .title a:hover {
+            color: #fff;
+            background-color: #707FB3;
+        }
+
+        .theTitle {
+            left: 10px;
+            width: 450px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+    </style>
+</head>
+<body>
+<%- partial('banner') %>
+
+<div class="main-con">
+    <div class="left-con">
+
+        <div class="left-one">
+            <p class="one-title">个人信息</p>
+            <div class="userInfo">
+                <a href="">
+                    <img class="userImage" src="<%= user.avatar %>" title="<%= user.loginname %>">
+                </a>
+                <a class=" userName" href="">
+                    <%= user.loginname %>
+                </a>
+            </div>
+
+            <p class="count"><%= user.score %></p>
+            <% if (user.collect_topic_count) {%>
             <a class='dark' href="/user/<%= user.loginname %>/collections" target='_blank'>
-              <span class='big collect-topic-count'><%= user.collect_topic_count %></span>话题收藏
+                <span class='big'><%= user.collect_topic_count %></span>话题收藏
             </a>
-          </li>
-          <%}%>
-          <% if (user.url) { %>
-          <li>
-            <i class="fa fa-lg fa-fw fa-home"></i>
-            <a class='dark' href="<%= user.url %>" target='_blank'><%= user.url %></a>
-          </li>
-          <% } %>
-          <% if (user.location) { %>
-          <li>
-            <i class="fa fa-lg fa-fw fa-map-marker"></i>
-            <span class='dark'><%= user.location %></span>
-          </li>
-          <% } %>
-          <% if (user.githubUsername) { %>
-          <li>
-            <i class="fa fa-lg fa-fw fa-github"></i>
-            <a class='dark' href="https://github.com/<%= user.githubUsername %>" target='_blank'>
-              @<%= user.githubUsername %>
+            <%}%>
+            <p class='col_fade'>注册时间 <%= user.create_at_ago() %></p>
+
+            <% if (user.weibo) { %>
+
+            <a class='dark' href="<%= user.weibo %>" target='_blank'><span class='big'><%= user.weibo %></span></a>
+            <% } %>
+
+
+            <% if (current_user && current_user.is_admin) { %>
+            <% if (!user.is_star) { %>
+            <span class='span-common' id='set_star_btn' action='set_star'>设为达人</span>
+            <% } else { %>
+            <span class='span-common' id='set_star_btn' action='cancel_star'>取消达人</span>
+            <% } %>
+
+            <% if (!user.is_block) { %>
+            <span class='span-common' id='set_block_btn' action='set_block'>屏蔽用户</span>
+            <% } else { %>
+            <span class='span-common' id='set_block_btn' action='cancel_block'>取消屏蔽用户</span>
+            <% } %>
+
+            <span class="span-common" id="delete_all">删除所有发言</span>
+
+            <br/><br/>
+            Email (Seen by Administrator): <a href="mailto:<%= user.email %>"><%= user.email %></a>
+            <% if (!user.active) { %>
+            <a href="/active_account?key=<%- typeof(token) !== 'undefined' && token %>&name=<%= user.loginname %>"
+               target="_blank">
+                <span class="span-common">
+                    激活账号
+                </span>
             </a>
-          </li>
-          <% } %>
-          <% if (user.weibo) { %>
-          <li>
-            <i class="fa fa-lg fa-fw fa-twitter"></i>
-            <a class='dark' href="<%= user.weibo %>" target='_blank'><%= user.weibo %></a>
-          </li>
-          <% } %>
-        </ul>
-      </div>
-      <p class='col_fade'>注册时间 <%= user.create_at_ago() %></p>
-      <% if (current_user && current_user.is_admin) { %>
-      <% if (!user.is_star) { %>
-      <span class='span-common' id='set_star_btn' action='set_star'>设为达人</span>
-      <% } else { %>
-      <span class='span-common' id='set_star_btn' action='cancel_star'>取消达人</span>
-      <% } %>
+            <% } %>
+            <% } %>
+        </div>
 
-      <% if (!user.is_block) { %>
-      <span class='span-common' id='set_block_btn' action='set_block'>屏蔽用户</span>
-      <% } else { %>
-      <span class='span-common' id='set_block_btn' action='cancel_block'>取消屏蔽用户</span>
-      <% } %>
+        <!--<div class="edit-con">-->
+        <!--<button class="edit-btn">发布话题</button>-->
+        <!--</div>-->
 
-      <span class="span-common" id="delete_all">删除所有发言</span>
+    </div>
+    <div class="right-con">
+        <div class="right-part">
+            <p class="title">
+                最近创建的话题
+            </p>
+            <% if (typeof(recent_topics) !== 'undefined' && recent_topics.length > 0) { %>
+            <% recent_topics.forEach(function(topic){ %>
+            <ul>
+                <a href='/topic/<%= topic._id %>' title='<%= topic.title %>'>
+                    <li class='theTitle'><%= topic.title %></li>
+                </a>
+            </ul>
+            <%})%>
+            <div class='cell more'>
+                <a class='dark' href="/user/<%= user.loginname %>/topics">查看更多»</a>
+            </div>
+            <% } else { %>
+            <div class='inner'>
+                <p>无话题</p>
+            </div>
+            <% } %>
 
-      <br/><br/>
-      Email (Seen by Administrator): <a href="mailto:<%= user.email %>"><%= user.email %></a>
-      <% if (!user.active) { %>
-      <a href="/active_account?key=<%- typeof(token) !== 'undefined' && token %>&name=<%= user.loginname %>"
-         target="_blank">
-         <span class="span-common">
-           激活账号
-         </span>
-       </a>
-      <% } %>
-      <% } %>
-    </div>
-  </div>
+        </div>
 
-  <div class='panel'>
-    <div class='header'>
-      <span class='col_fade'>最近创建的话题</span>
+        <div class="right-part" style="margin-top:15px">
+            <p class="title">
+                最近参与的话题
+            </p>
+            <% if (typeof(recent_replies) !== 'undefined' && recent_replies.length > 0) { %>
+            <% recent_replies.forEach(function(topic){ %>
+            <ul>
+                <a href='/topic/<%= topic._id %>' title='<%= topic.title %>'>
+                    <li class='theTitle'><%= topic.title %></li>
+                </a>
+            </ul>
+            <%})%>
+            <div class='cell more'>
+                <a class='dark' href="/user/<%= user.loginname %>/replies">查看更多»</a>
+            </div>
+            <% } else { %>
+            <div class='inner'>
+                <p>无话题</p>
+            </div>
+            <% } %>
+        </div>
     </div>
-    <% if (typeof(recent_topics) !== 'undefined' && recent_topics.length > 0) { %>
-    <%- partial('../topic/abstract', { collection: recent_topics, as: 'topic' }) %>
-    <div class='cell more'>
-      <a class='dark' href="/user/<%= user.loginname %>/topics">查看更多»</a>
-    </div>
-    <% } else { %>
-    <div class='inner'>
-      <p>无话题</p>
-    </div>
-    <% } %>
-  </div>
-
-  <div class='panel'>
-    <div class='header'>
-      <span class='col_fade'>最近参与的话题</span>
-    </div>
-    <% if (typeof(recent_replies) !== 'undefined' && recent_replies.length > 0) { %>
-    <%- partial('../topic/abstract', { collection: recent_replies, as: 'topic' }) %>
-    <div class='cell more'>
-      <a class='dark' href="/user/<%= user.loginname %>/replies">查看更多»</a>
-    </div>
-    <% } else { %>
-    <div class='inner'>
-      <p>无话题</p>
-    </div>
-    <% } %>
-  </div>
 </div>
 
-<% if (current_user) { %>
-<script>
-  $(document).ready(function () {
-    $('#set_star_btn').click(function () {
-      var $me = $(this);
-      var action = $me.attr('action');
-      var params = {
-        user_id: '<%= user._id %>',
-        _csrf: '<%- csrf %>'
-      };
-      $.post('/user/' + action, params, function (data) {
-        if (data.status === 'success') {
-          if (action === 'set_star') {
-            $me.html('取消达人');
-            $me.attr('action', 'cancel_star');
-          } else {
-            $me.html('设为达人');
-            $me.attr('action', 'set_star');
-          }
-        }
-      }, 'json');
-    });
-
-    $('#set_block_btn').click(function () {
-      var $me = $(this);
-      var action = $me.attr('action');
-      var params = {
-        _csrf: '<%- csrf %>',
-        action: action
-      };
-      if (action === 'set_block' && !confirm('确定要屏蔽该用户吗？')) {
-        return;
-      }
-      $.post('/user/<%- user.loginname %>/block', params, function (data) {
-        if (data.status === 'success') {
-          if (action === 'set_block') {
-            $me.html('取消屏蔽用户');
-            $me.attr('action', 'cancel_block');
-          } else if (action === 'cancel_block') {
-            $me.html('屏蔽用户');
-            $me.attr('action', 'set_block');
-          }
-        }
-      }, 'json');
-    })
-
-    $('#delete_all').click(function () {
-      var $me = $(this);
-      var params = {
-        _csrf: '<%- csrf %>',
-      };
-      if (!confirm('确定要删除吗？（不会永久删除，只做标记位）')) {
-        return;
-      }
-      $.post('/user/<%- user.loginname %>/delete_all', params, function (data) {
-        if (data.status === 'success') {
-          alert('操作成功');
-        }
-      }, 'json');
-    })
-  });
-</script>
-<% } %>
+</body>
+</html>

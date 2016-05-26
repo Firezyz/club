@@ -19,13 +19,7 @@ var config = require('../config');
 var _ = require('lodash');
 var cache = require('../common/cache');
 
-/**
- * Topic page
- *
- * @param  {HttpRequest} req
- * @param  {HttpResponse} res
- * @param  {Function} next
- */
+
 exports.index = function (req, res, next) {
     function isUped(user, reply) {
         if (!reply.ups) {
@@ -43,7 +37,7 @@ exports.index = function (req, res, next) {
     var events = ['topic', 'other_topics', 'no_reply_topics', 'is_collect'];
     var ep = EventProxy.create(events,
         function (topic, other_topics, no_reply_topics, is_collect) {
-            res.render('topic/index', {
+            res.render('topic', {
                 topic: topic,
                 author_other_topics: other_topics,
                 no_reply_topics: no_reply_topics,
@@ -111,7 +105,7 @@ exports.index = function (req, res, next) {
 };
 
 exports.create = function (req, res, next) {
-    res.render('topic/edit', {
+    res.render('edit', {
         tabs: config.tabs
     });
 };
@@ -142,7 +136,7 @@ exports.put = function (req, res, next) {
 
     if (editError) {
         res.status(422);
-        return res.render('topic/edit', {
+    return res.render('edit', {
             edit_error: editError,
             title: title,
             content: content,
@@ -184,7 +178,7 @@ exports.showEdit = function (req, res, next) {
         }
 
         if (String(topic.author_id) === String(req.session.user._id) || req.session.user.is_admin) {
-            res.render('topic/edit', {
+            res.render('edit', {
                 action: 'edit',
                 topic_id: topic._id,
                 title: topic.title,

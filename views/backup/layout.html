@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!-- meta -->
+    <meta charset="utf-8"/>
+    <meta name='description' content='<%= config.description %>'>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="keywords" content="<%= config.keywords %>"/>
+    <meta name="apple-itunes-app" content="app-id=954734793">
+    <!-- see http://smerity.com/articles/2013/where_did_all_the_http_referrers_go.html -->
+    <meta name="referrer" content="always">
+
+    <%
+    var headers = config.site_headers || [];
+    for (var i = 0, l = headers.length; i < l; i++) {
+    %>
+    <%- headers[i] %>
+    <% } %>
+
+    <% if (config.site_icon) { %>
+    <link rel="icon" href="<%- staticFile(config.site_icon) %>" type="image/x-icon"/>
+    <% } %>
+
+    <link href="/static/stylesheets/index.css" rel="stylesheet" type="text/css"/>
+
+    <!-- style -->
+
+    <!-- scripts -->
+
+    <% if (typeof(topic) !== 'undefined') { %>
+    <title><%= topic.title %> - <%= config.name %></title>
+    <% } else if (typeof(pageTitle) !== 'undefined') { %>
+    <title><%= pageTitle %> - <%= config.name %></title>
+    <% } else { %>
+    <title><%= config.description %></title>
+    <% } %>
+    <meta content="_csrf" name="csrf-param">
+    <meta content="<%= csrf %>" name="csrf-token">
+</head>
+<body>
+<div class="banner">
+    <a href="/">
+        <% if (config.site_logo) {%>
+        <img src="<%- staticFile(config.site_logo) %>"/>
+        <%} else {%>
+        <%- config.name %>
+        <%}%>
+    </a>
+    <img src="" class="icon">
+    <a href="/"><p class="index">首页</p></a>
+
+    <% if (current_user){ %>
+    <a href='/my/messages'>
+        <% if (current_user.messages_count) { %>
+        <p><%= current_user.messages_count %></p>
+        <% } %>
+        未读消息
+    </a>
+    <% } %>
+
+    <% if (current_user) { %>
+    <a href='/setting'><p class="set">设置</p></a>
+    <a href="/user/<%= current_user.loginname %>"><%= current_user.loginname %></a>
+    <a href='/signout'><p class="exist">退出</p></a>
+    <div class="search">
+        <input type="text">
+        <button>搜索</button>
+    </div>
+    <% } else { %>
+    <a href='/signup'><p class="register">注册</p></a>
+    <a href='/signin'><p class="login">登录</p></a>
+    <% } %>
+</div>
+<div class='main-con'>
+    <%- body %>
+</div>
+<!--<div id='backtotop'>回到顶部</div>-->
+<!--<div id='footer'>-->
+    <!--<div id='footer_main'>-->
+        <!--firezyz@2016-->
+    <!--</div>-->
+<!--</div>-->
+<div id="sidebar-mask"></div>
+</body>
+</html>

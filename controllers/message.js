@@ -7,7 +7,7 @@ exports.index = function (req, res, next) {
     ep.fail(next);
 
     ep.all('has_read_messages', 'hasnot_read_messages', function (has_read_messages, hasnot_read_messages) {
-        res.render('message/index', {has_read_messages: has_read_messages, hasnot_read_messages: hasnot_read_messages});
+        res.render('message', {has_read_messages: has_read_messages, hasnot_read_messages: hasnot_read_messages});
     });
 
     ep.all('has_read', 'unread', function (has_read, unread) {

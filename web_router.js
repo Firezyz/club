@@ -24,7 +24,7 @@ router.get('/admin', auth.adminRequired, admin.showAdmin); // 跳转到管理员
 
 router.get('/signup', sign.showSignup);  // 跳转到注册页面
 router.post('/signup', sign.signup);  // 提交注册信息
-router.post('/signout', sign.signout);  // 登出
+router.get('/signout', sign.signout);  // 登出
 router.get('/signin', sign.showLogin);  // 进入登录页面
 router.post('/signin', sign.login);  // 登录校验
 router.get('/active_account', sign.activeAccount);  //帐号激活
@@ -79,7 +79,8 @@ router.post('/reply/:reply_id/delete', auth.userRequired, reply.delete); // 删�
 router.post('/reply/:reply_id/up', auth.userRequired, reply.up); // 为评论点赞
 router.post('/upload', auth.userRequired, topic.upload); //上传图片
 
-router.get('/search', search.index);
+router.get('/search', search.search);
+router.post('/search', search.search);
 
 router.get('/manage', manage.index);
 router.post('/manage/user/:user_ids/delete', auth.userRequired, manage.index);
