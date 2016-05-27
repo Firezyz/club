@@ -220,7 +220,6 @@
             width: 100%;
             padding: 15px;
             height: 100px;
-            border: 1px solid;
         }
 
         .right-part .title {
@@ -306,7 +305,7 @@
             border-radius: 5px;
         }
 
-        .right-part .discuss-list .submit-btn {
+        .submit-btn {
             width: 70px;
             display: block;
             height: 30px;
@@ -317,13 +316,26 @@
             border-radius: 4px;
         }
 
+        .reply-input {
+            padding-left: 50px;
+        }
+
+        .reply-master-con {
+            padding: 10px 15px;
+        }
+
+        .reply-master {
+            width: 740px;
+            font-size: 16px;
+        }
+
     </style>
 </head>
 <body>
 <%- partial('banner') %>
 
 <div class="main-con">
-    <%- partial('userside') %>
+    <%- partial('userside',{ object: topic.author, as: 'user' }) %>
     <div class="right-con">
         <div class="right-part">
             <div class="title-part">
@@ -410,8 +422,6 @@
             </div>
         </div>
         <div class="right-part">
-
-
             <% if (topic.replies && topic.replies.length > 0) { %>
             <p class="title"><%= topic.replies.length %> 回复</p>
             <ul class="discuss-list">
@@ -447,8 +457,8 @@
                         </span>
                     </div>
                     <p><%- markdown(reply.content) %></p>
-                    <div style="display:block">
-                        <form>
+                    <div style="display:none" class="reply-input">
+                        <form action='/<%= topic._id %>/reply' method='post'>
                             <textarea class="reply"></textarea>
                             <input class="submit-btn" type="submit" value="回复">
                         </form>
@@ -458,6 +468,12 @@
 
             </ul>
             <% } %>
+            <div class="reply-master-con">
+                <form action='/<%= topic._id %>/reply' method='post'>
+                    <textarea class="reply-master" name='r_content'></textarea>
+                    <input class="submit-btn" type="submit" value="回复">
+                </form>
+            </div>
         </div>
     </div>
 </div>
@@ -472,6 +488,14 @@
             $(this).attr('src', 'http://7xt2qz.com1.z0.glb.clouddn.com/like_512px_1101033_easyicon.net.png')
         }
 
+
+    })
+    $('.reply-icon').click(function () {
+        if ($(this).parent().parent().parent().children('.reply-input').css('display') == 'block') {
+            $(this).parent().parent().parent().children('.reply-input').css('display', 'none')
+        } else {
+            $(this).parent().parent().parent().children('.reply-input').css('display', 'block')
+        }
 
     })
 </script>
